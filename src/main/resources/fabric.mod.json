@@ -51,7 +51,8 @@
     "java": ">=21"
   },
   "conflicts": {
-    "skinlayers": "*"
+    "skinlayers": "*",
+    "essential": "*"
   },
   "custom": {
     "modmenu": {
