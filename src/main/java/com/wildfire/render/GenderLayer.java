@@ -37,17 +37,16 @@ import net.fabricmc.api.Environment;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.state.BipedEntityRenderState;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
@@ -287,14 +286,13 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 
 	private void renderBreast(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light,
 	                          int overlay, BreastSide side) {
-		LivingEntity entity = Objects.requireNonNull(getEntity(state), "getEntity()");
 		RenderLayer breastRenderType = getRenderLayer(state);
 		if(breastRenderType == null) return; // only render if the player is visible in some capacity
-		int alpha = entity.isInvisible() ? ColorHelper.channelFromFloat(0.15f) : 255;
+		int alpha = state.invisible ? ColorHelper.channelFromFloat(0.15f) : 255;
 		int color = ColorHelper.getArgb(alpha, 255, 255, 255);
 		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(breastRenderType);
 		renderBox(side.isLeft ? lBreast : rBreast, matrixStack, vertexConsumer, light, overlay, color);
-		if(entity instanceof AbstractClientPlayerEntity player && player.isPartVisible(PlayerModelPart.JACKET)) {
+		if(state instanceof PlayerEntityRenderState playerState && playerState.jacketVisible) {
 			matrixStack.translate(0, 0, -0.015f);
 			matrixStack.scale(1.05f, 1.05f, 1.05f);
 			renderBox(side.isLeft ? lBreastWear : rBreastWear, matrixStack, vertexConsumer, light, overlay, color);
