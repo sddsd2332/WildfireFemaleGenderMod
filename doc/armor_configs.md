@@ -41,8 +41,8 @@ Defaults to `0.0` (0%) if not set.
 ### `covers_breasts`
 
 Boolean value determining if this armor piece covers the wearer's breasts; this is intended to be set to `false` for equippable
-chest slot items with an open front, such as the Elytra. Note that this does *not* prevent the item from rendering over the wearer's
-breasts.
+chest slot items with an open front, such as the Elytra.  
+Note that if this is `false` the armor layer won't be rendered, as if the armor piece simply didn't exist.
 
 Defaults to `true` if not set.
 

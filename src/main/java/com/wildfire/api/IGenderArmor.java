@@ -58,7 +58,10 @@ public interface IGenderArmor {
     }));
 
     /**
-     * Determines whether this {@link IGenderArmor} "covers" the breasts or if it has an open front ({@code false}) like the elytra.
+     * <p>Determines whether this {@link IGenderArmor} "covers" the breasts or if it has an open front ({@code false}) like the elytra.</p>
+     *
+     * <p>If this returns {@code false} the breast armor layer will not be rendered while this item is worn, as if
+     * the item simply didn't exist.</p>
      *
      * @return {@code true} if the breasts are covered.
      *

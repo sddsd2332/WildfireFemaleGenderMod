@@ -133,6 +133,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 			if(!setupRender(state, entityConfig)) return;
 			int overlay = LivingEntityRenderer.getOverlay(state, 0);
 
+			//noinspection CodeBlock2Expr
 			renderSides(state, getContextModel(), matrixStack, side -> {
 				renderBreast(state, matrixStack, vertexConsumerProvider, light, overlay, side);
 			});
@@ -161,9 +162,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 			return false;
 		}
 
-		RenderLayer type = getRenderLayer(state);
-		if(type == null && !isChestplateOccupied) {
-			// the entity is invisible and doesn't have a chestplate equipped
+		if(!isLayerVisible(state)) {
 			return false;
 		}
 
@@ -214,6 +213,10 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 						entity.getWorld().getBlockState(new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ())).isOf(Blocks.BUBBLE_COLUMN)));
 		bounceEnabled = entityConfig.hasBreastPhysics() && (!isChestplateOccupied || resistance < 1); //oh, you found this?
 		return true;
+	}
+
+	protected boolean isLayerVisible(S state) {
+		return !state.invisibleToPlayer || state.hasOutline;
 	}
 
 	protected void resizeBox(float breastSize) {

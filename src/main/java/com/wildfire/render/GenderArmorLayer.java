@@ -99,7 +99,6 @@ public class GenderArmorLayer<S extends BipedEntityRenderState, M extends BipedE
 			if(entityConfig == null) return;
 
 			if(!setupRender(state, entityConfig)) return;
-			// TODO skip rendering if coversBreasts() is false, or maybe make a separate renderArmor() property instead?
 			if(ent instanceof ArmorStandEntity && !genderArmor.armorStandsCopySettings()) return;
 
 			int color = chestplate.isIn(ItemTags.DYEABLE) ? DyedColorComponent.getColor(chestplate, -1) : -1;
@@ -126,6 +125,11 @@ public class GenderArmorLayer<S extends BipedEntityRenderState, M extends BipedE
 		} catch(Exception e) {
 			WildfireGender.LOGGER.error("Failed to render breast armor", e);
 		}
+	}
+
+	@Override
+	protected boolean isLayerVisible(S state) {
+		return genderArmor.coversBreasts();
 	}
 
 	@Override
