@@ -41,15 +41,15 @@ Defaults to `0.0` (0%) if not set.
 ### `covers_breasts`
 
 Boolean value determining if this armor piece covers the wearer's breasts; this is intended to be set to `false` for equippable
-chest slot items with an open front, such as the Elytra. Note that this does *not* prevent the item from rendering over the wearer's
-breasts.
+chest slot items with an open front, such as the Elytra.  
+Note that if this is `false` the armor layer won't be rendered, as if the armor piece simply didn't exist.
 
 Defaults to `true` if not set.
 
 ### `hide_breasts`
 
 Boolean value determining if the wearer's breasts should be hidden entirely while this armor piece is worn; this is
-intended for armor that use custom rendering which is largely incompatible with how this mod's breasts render.
+intended for armor that use custom rendering which would just lead to clipping or other unintended behavior.
 
 Defaults to `false` if not set.
 
@@ -65,15 +65,14 @@ Defaults to `true` *only* if `resistance` is `1.0` if unset.
 
 ### `texture`
 
-Object containing various texture-related overrides; note that all values that specify `{"x": ..., "y": ...}`
-*must* contain both `x` and `y` if specified.
+Object containing various texture-related overrides; note that all values **must** contain both `x` *and* `y` if specified.
 
 #### `texture_size`
 
 Controls the armor sprite's texture size.
 
-Note that if your sprite is simply an upscaled resolution of the vanilla sprite size (such as 128x64, 256x128, etc.)
-then you do *not* need to modify this or any other texture values.
+Note that if your sprite is simply an upscaled resolution of the vanilla sprite (such as 128x64, 256x128, etc.)
+you do *not* need to modify this or any other texture values, as it'll already handle that automatically.
 
 Defaults to `{"x": 64, "y": 32}` if unset.
 

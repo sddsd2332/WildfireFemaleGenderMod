@@ -26,12 +26,13 @@ import com.wildfire.render.WildfireModelRenderer.BreastModelBox;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.equipment.EquipmentModelLoader;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.state.ArmorStandEntityRenderState;
 import net.minecraft.client.render.entity.state.BipedEntityRenderState;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModelManager;
 import net.minecraft.client.texture.MissingSprite;
@@ -43,7 +44,6 @@ import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.equipment.EquipmentModel;
 import net.minecraft.item.equipment.trim.ArmorTrim;
@@ -99,7 +99,6 @@ public class GenderArmorLayer<S extends BipedEntityRenderState, M extends BipedE
 			if(entityConfig == null) return;
 
 			if(!setupRender(state, entityConfig)) return;
-			// TODO skip rendering if coversBreasts() is false, or maybe make a separate renderArmor() property instead?
 			if(ent instanceof ArmorStandEntity && !genderArmor.armorStandsCopySettings()) return;
 
 			int color = chestplate.isIn(ItemTags.DYEABLE) ? DyedColorComponent.getColor(chestplate, -1) : -1;
@@ -129,6 +128,11 @@ public class GenderArmorLayer<S extends BipedEntityRenderState, M extends BipedE
 	}
 
 	@Override
+	protected boolean isLayerVisible(S state) {
+		return genderArmor.coversBreasts();
+	}
+
+	@Override
 	protected void resizeBox(float breastSize) {
 		if(genderArmor == null || Objects.equals(textureData, genderArmor.texture())) {
 			return;
@@ -146,9 +150,8 @@ public class GenderArmorLayer<S extends BipedEntityRenderState, M extends BipedE
 	@Override
 	protected void setupTransformations(S state, M model, MatrixStack matrixStack, BreastSide side) {
 		super.setupTransformations(state, model, matrixStack, side);
-		LivingEntity entity = Objects.requireNonNull(getEntity(state), "getEntity()");
-		if((entity instanceof AbstractClientPlayerEntity player && player.isPartVisible(PlayerModelPart.JACKET)) ||
-				(entity instanceof ArmorStandEntity && entityConfig.hasJacketLayer())) {
+		if((state instanceof PlayerEntityRenderState playerState && playerState.jacketVisible) ||
+				(state instanceof ArmorStandEntityRenderState && entityConfig.hasJacketLayer())) {
 			matrixStack.translate(0, 0, -0.015f);
 			matrixStack.scale(1.05f, 1.05f, 1.05f);
 		}

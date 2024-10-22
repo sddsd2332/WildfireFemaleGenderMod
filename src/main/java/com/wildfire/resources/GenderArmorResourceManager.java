@@ -33,7 +33,9 @@ import net.minecraft.util.profiler.Profiler;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public final class GenderArmorResourceManager extends JsonDataLoader<IGenderArmor> implements IdentifiableResourceReloadListener {
