@@ -49,7 +49,6 @@ public class WildfireBreastPresetList extends EntryListWidget<WildfireBreastPres
 
     public WildfireBreastPresetList(WildfireBreastCustomizationScreen parent, int listWidth, int top) {
         super(MinecraftClient.getInstance(), 156, parent.height, top, 32);
-        this.setRenderHeader(false, 0);
         this.parent = parent;
         this.listWidth = listWidth;
         this.refreshList();
@@ -83,7 +82,7 @@ public class WildfireBreastPresetList extends EntryListWidget<WildfireBreastPres
 
     @Override
     public int getRowTop(int index) {
-        return this.getY() - (int)this.getScrollAmount() + index * this.itemHeight + this.headerHeight;
+        return this.getY() - (int)this.getScrollY() + index * this.itemHeight + this.headerHeight;
     }
 
     @Override
@@ -106,7 +105,7 @@ public class WildfireBreastPresetList extends EntryListWidget<WildfireBreastPres
             System.out.println("Preset Name: " + presetCfg.get(BreastPresetConfiguration.PRESET_NAME));
             tmpPresets.add(new BreastPresetListEntry(presetCfg.get(BreastPresetConfiguration.PRESET_NAME), presetCfg));
         }
-        BREAST_PRESETS = tmpPresets.toArray(new BreastPresetListEntry[tmpPresets.size()]);
+        BREAST_PRESETS = tmpPresets.toArray(BreastPresetListEntry[]::new);
 
         if(this.client.world == null || this.client.player == null) return;
 

@@ -26,7 +26,9 @@ import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.resource.JsonDataLoader;
+import net.minecraft.resource.ResourceFinder;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
@@ -40,7 +42,7 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 public final class GenderArmorResourceManager extends JsonDataLoader<IGenderArmor> implements IdentifiableResourceReloadListener {
 	private GenderArmorResourceManager() {
-		super(IGenderArmor.CODEC, "wildfire_gender_data");
+		super(IGenderArmor.CODEC, ResourceFinder.json("wildfire_gender_data"));
 	}
 
 	public static final GenderArmorResourceManager INSTANCE = new GenderArmorResourceManager();
@@ -52,7 +54,8 @@ public final class GenderArmorResourceManager extends JsonDataLoader<IGenderArmo
 
 	public static Optional<IGenderArmor> get(ItemStack item) {
 		return Optional.ofNullable(item.get(DataComponentTypes.EQUIPPABLE))
-				.flatMap(EquippableComponent::model)
+				.flatMap(EquippableComponent::assetId)
+				.map(RegistryKey::getValue)
 				.map(GenderArmorResourceManager::get);
 	}
 
