@@ -51,7 +51,7 @@ public final class CloudSync {
 
 	private static Instant lastSync = Instant.EPOCH;
 	private static final List<Instant> fetchErrors = new ArrayList<>();
-	private static @Nullable Instant disableUntil;
+	private static @Nullable Instant disableFetchingUntil;
 
 	private static final Executor EXECUTOR = Util.getIoWorkerExecutor().named("wildfire_gender$cloudSync");
 	private static final Gson GSON = new Gson();
@@ -87,12 +87,12 @@ public final class CloudSync {
 		return url.isBlank() ? DEFAULT_CLOUD_URL : url;
 	}
 
-	private static void markError() {
+	private static void markFetchError() {
 		fetchErrors.add(Instant.now());
-		fetchErrors.removeIf(e -> e.plus(10, ChronoUnit.SECONDS).isBefore(Instant.now()));
+		fetchErrors.removeIf(e -> e.plus(30, ChronoUnit.SECONDS).isBefore(Instant.now()));
 		if(fetchErrors.size() >= 10) {
 			WildfireGender.LOGGER.error("Too many recent sync errors, disabling future lookups for 5 minutes");
-			disableUntil = Instant.now().plus(5, ChronoUnit.MINUTES);
+			disableFetchingUntil = Instant.now().plus(5, ChronoUnit.MINUTES);
 		}
 	}
 
@@ -200,7 +200,7 @@ public final class CloudSync {
 	 * 		   stored in the sync server, or {@code null} otherwise.
 	 */
 	public static CompletableFuture<@Nullable JsonObject> getProfile(UUID uuid) {
-		if(!isEnabled() || disableUntil != null && disableUntil.isAfter(Instant.now())) {
+		if(!isEnabled() || disableFetchingUntil != null && disableFetchingUntil.isAfter(Instant.now())) {
 			return CompletableFuture.completedFuture(null);
 		}
 
@@ -220,7 +220,7 @@ public final class CloudSync {
 					WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
 					return null;
 				} else if(code >= 400 || code == -1) {
-					markError();
+					markFetchError();
 					String response;
 					try(var stream = connection.getErrorStream()) {
 						response = IOUtils.toString(stream, StandardCharsets.UTF_8);
@@ -236,7 +236,7 @@ public final class CloudSync {
 
 				return GSON.fromJson(response, JsonObject.class);
 			} catch(IOException e) {
-				markError();
+				markFetchError();
 				throw new RuntimeException(e);
 			}
 		}, EXECUTOR);

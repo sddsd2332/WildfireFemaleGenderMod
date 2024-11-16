@@ -21,6 +21,7 @@ package com.wildfire.gui.screen;
 import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.cloud.CloudSync;
+import com.wildfire.main.cloud.SyncingTooFrequentlyException;
 import com.wildfire.main.config.GlobalConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,6 +36,8 @@ import net.minecraft.util.Identifier;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Environment(EnvType.CLIENT)
 public class WildfireCloudSyncScreen extends BaseWildfireScreen {
@@ -87,13 +90,20 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 	private void sync(ButtonWidget button) {
 		button.active = false;
 		button.setMessage(Text.translatable("wildfire_gender.cloud.syncing"));
-		CloudSync.sync(Objects.requireNonNull(getPlayer()))
-				.thenRun(() -> button.setMessage(Text.translatable("wildfire_gender.cloud.syncing.success")))
-				.exceptionallyAsync(exc -> {
-					WildfireGender.LOGGER.error("Failed to sync settings", exc);
-					button.setMessage(Text.translatable("wildfire_gender.cloud.syncing.fail"));
-					return null;
-				});
+		CompletableFuture.runAsync(() -> {
+			try {
+				CloudSync.sync(Objects.requireNonNull(getPlayer())).join();
+				button.setMessage(Text.translatable("wildfire_gender.cloud.syncing.success"));
+			} catch(Exception e) {
+				var actualException = e instanceof CompletionException ce ? ce.getCause() : e;
+				if(actualException instanceof SyncingTooFrequentlyException) {
+					WildfireGender.LOGGER.warn("Failed to sync settings as we've already synced too recently");
+				} else {
+					WildfireGender.LOGGER.error("Failed to sync settings", actualException);
+				}
+				button.setMessage(Text.translatable("wildfire_gender.cloud.syncing.fail"));
+			}
+		});
 	}
 
 	@Override

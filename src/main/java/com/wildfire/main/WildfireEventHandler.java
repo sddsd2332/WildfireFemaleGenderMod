@@ -21,7 +21,6 @@ package com.wildfire.main;
 import com.wildfire.gui.screen.BaseWildfireScreen;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
 import com.wildfire.main.cloud.CloudSync;
-import com.wildfire.main.cloud.SyncingTooFrequentlyException;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
@@ -59,6 +58,7 @@ import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public final class WildfireEventHandler {
 	private WildfireEventHandler() {
@@ -158,19 +158,16 @@ public final class WildfireEventHandler {
 			if(clientConfig != null) WildfireSync.sendToServer(clientConfig);
 		}
 
-		// Only attempt once every 15.5 seconds to ensure that the cloud sync cooldown isn't hit
-		if(timer % (15.5 * 20) == 0 && clientConfig != null && clientConfig.needsCloudSync && !(client.currentScreen instanceof BaseWildfireScreen)) {
-			if(GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC)) {
-				CloudSync.sync(clientConfig)
-						.thenRun(() -> WildfireGender.LOGGER.info("Synced player data to the cloud"))
-						.exceptionallyAsync(exc -> {
-							if(exc instanceof SyncingTooFrequentlyException) {
-								WildfireGender.LOGGER.warn("Couldn't sync player data as we've already synced too recently");
-							} else {
-								WildfireGender.LOGGER.error("Failed to sync player data", exc);
-							}
-							return null;
-						});
+		if(timer % 40 == 0 && clientConfig != null && clientConfig.needsCloudSync && !(client.currentScreen instanceof BaseWildfireScreen)) {
+			if(GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) && !CloudSync.syncOnCooldown()) {
+				CompletableFuture.runAsync(() -> {
+					try {
+						CloudSync.sync(clientConfig).join();
+						WildfireGender.LOGGER.info("Synced player data to the cloud");
+					} catch(Exception e) {
+						WildfireGender.LOGGER.error("Failed to sync player data", e);
+					}
+				});
 				clientConfig.needsCloudSync = false;
 			}
 		}
