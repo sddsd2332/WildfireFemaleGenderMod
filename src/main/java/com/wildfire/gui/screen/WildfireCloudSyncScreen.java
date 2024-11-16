@@ -28,15 +28,11 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -47,15 +43,12 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 	private static final Text DISABLED = Text.translatable("wildfire_gender.label.disabled").formatted(Formatting.RED);
 	private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/sync_bg.png");
 
-	private TextFieldWidget cloudUrl;
-
 	protected WildfireCloudSyncScreen(Screen parent, UUID uuid) {
 		super(Text.translatable("wildfire_gender.cloud_settings"), parent, uuid);
 	}
 
 	@Override
 	public void init() {
-		final var client = Objects.requireNonNull(this.client);
 		int x = this.width / 2;
 		int y = this.height / 2;
 		int yPos = y - 44;
@@ -63,7 +56,7 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 
 		this.addDrawableChild(new WildfireButton(this.width / 2 + 85, yPos - 11, 9, 9, Text.literal("X"), button -> close()));
 
-		this.addDrawableChild(new WildfireButton(xPos - 35, yPos, 100, 20,
+		this.addDrawableChild(new WildfireButton(xPos - 15, yPos, 80, 20,
 				CloudSync.isEnabled() ? ENABLED : DISABLED,
 				button -> {
 					var config = GlobalConfig.INSTANCE;
@@ -71,12 +64,18 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 					button.setMessage(CloudSync.isEnabled() ? ENABLED : DISABLED);
 				}));
 
-		this.cloudUrl = new TextFieldWidget(client.textRenderer, 100, 20, Text.translatable("wildfire_gender.cloud.url"));
-		cloudUrl.setX(xPos - 35);
-		cloudUrl.setY(yPos + 22);
-		cloudUrl.setText(GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SERVER));
-		cloudUrl.setTooltip(Tooltip.of(Text.translatable("wildfire_gender.cloud.url.tooltip")));
-		this.addDrawableChild(cloudUrl);
+		var automaticTooltip = Tooltip.of(Text.empty()
+				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.l1"))
+				.append("\n\n")
+				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.l2")));
+		this.addDrawableChild(new WildfireButton(xPos - 15, yPos + 22, 80, 20,
+				GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) ? ENABLED : DISABLED,
+				button -> {
+					var config = GlobalConfig.INSTANCE;
+					var newVal = !config.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC);
+					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, newVal);
+					button.setMessage(newVal ? ENABLED : DISABLED);
+				}, automaticTooltip));
 
 		var syncButton = new WildfireButton(xPos - 80, yPos + 80, 100, 15, Text.translatable("wildfire_gender.cloud.sync"), this::sync);
 		syncButton.setActive(GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED));
@@ -111,21 +110,11 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 		int y = this.height / 2;
 
 		ctx.drawText(textRenderer, Text.translatable("wildfire_gender.cloud.status"), x - 95, y - 40, 0x000000, false);
-		ctx.drawText(textRenderer, Text.translatable("wildfire_gender.cloud.url"), x - 95, y - 16, 0x000000, false);
+		ctx.drawText(textRenderer, Text.translatable("wildfire_gender.cloud.automatic"), x - 95, y - 16, 0x000000, false);
 	}
 
 	@Override
 	public void close() {
-		try {
-			var url = cloudUrl.getText();
-			if(!url.isBlank()) {
-				//noinspection ResultOfMethodCallIgnored
-				new URI(url).toURL();
-			}
-			GlobalConfig.INSTANCE.set(GlobalConfig.CLOUD_SERVER, url);
-		} catch(MalformedURLException | URISyntaxException | IllegalArgumentException e) {
-			// invalid url, discard it
-		}
 		GlobalConfig.INSTANCE.save();
 		super.close();
 	}

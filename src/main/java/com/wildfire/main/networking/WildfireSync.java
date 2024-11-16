@@ -97,5 +97,6 @@ public final class WildfireSync {
 
 		ClientPlayNetworking.send(new ServerboundSyncPacket(plr));
 		plr.needsSync = false;
+		plr.needsCloudSync = true;
 	}
 }

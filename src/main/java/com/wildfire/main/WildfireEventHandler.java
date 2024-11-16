@@ -18,7 +18,10 @@
 
 package com.wildfire.main;
 
+import com.wildfire.gui.screen.BaseWildfireScreen;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
+import com.wildfire.main.cloud.CloudSync;
+import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
 import com.wildfire.main.networking.ServerboundSyncPacket;
@@ -144,12 +147,27 @@ public final class WildfireEventHandler {
 	private static void onClientTick(MinecraftClient client) {
 		if(client.world == null || client.player == null) return;
 
+		PlayerConfig clientConfig = WildfireGender.getPlayerById(client.player.getUuid());
+		timer++;
+
 		// Only attempt to sync if the server will accept the packet, and only once every 5 ticks, or around 4 times a second
-		if(ServerboundSyncPacket.canSend() && timer++ % 5 == 0) {
-			PlayerConfig aPlr = WildfireGender.getPlayerById(client.player.getUuid());
+		if(ServerboundSyncPacket.canSend() && timer % 5 == 0) {
 			// sendToServer will only actually send a packet if any changes have been made that need to be synced,
 			// or if we haven't synced before.
-			if(aPlr != null) WildfireSync.sendToServer(aPlr);
+			if(clientConfig != null) WildfireSync.sendToServer(clientConfig);
+		}
+
+		// Only attempt once every 15.5 seconds to ensure that the cloud sync cooldown isn't hit
+		if(timer % (15.5 * 20) == 0 && clientConfig != null && clientConfig.needsCloudSync && !(client.currentScreen instanceof BaseWildfireScreen)) {
+			if(GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC)) {
+				CloudSync.sync(clientConfig)
+						.thenRun(() -> WildfireGender.LOGGER.info("Synced player data to the cloud"))
+						.exceptionallyAsync(exc -> {
+							WildfireGender.LOGGER.error("Failed to sync player data", exc);
+							return null;
+						});
+				clientConfig.needsCloudSync = false;
+			}
 		}
 
 		if(CONFIG_KEYBIND.wasPressed() && client.currentScreen == null) {

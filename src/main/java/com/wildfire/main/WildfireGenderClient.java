@@ -60,7 +60,7 @@ public class WildfireGenderClient implements ClientModInitializer {
 					WildfireGender.LOGGER.error("Failed to fetch profile from sync server", e);
 					throw e;
 				}
-				if(data != null) {
+				if(data != null && player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
 					player.updateFromJson(data);
 				}
 			}

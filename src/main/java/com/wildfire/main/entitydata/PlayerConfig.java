@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 public class PlayerConfig extends EntityConfig {
 
 	public boolean needsSync;
+	public boolean needsCloudSync;
 	public SyncStatus syncStatus = SyncStatus.UNKNOWN;
 
 	private final Configuration cfg;
@@ -177,6 +178,7 @@ public class PlayerConfig extends EntityConfig {
 		breasts.updateCleavage(cfg.get(Configuration.BREASTS_CLEAVAGE));
 		if(markForSync) {
 			this.needsSync = true;
+			this.needsCloudSync = true;
 		}
 	}
 
@@ -214,6 +216,7 @@ public class PlayerConfig extends EntityConfig {
 
 		config.save();
 		plr.needsSync = true;
+		plr.needsCloudSync = true;
 	}
 
 	@Override
