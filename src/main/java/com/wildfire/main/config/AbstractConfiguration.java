@@ -80,6 +80,10 @@ public abstract class AbstractConfiguration {
 		SAVE_VALUES.remove(key);
 	}
 
+	public boolean exists() {
+		return CFG_FILE.exists();
+	}
+
 	public void save() {
 		if(!supportsSaving()) return;
 		try(FileWriter writer = new FileWriter(CFG_FILE); JsonWriter jsonWriter = new JsonWriter(writer)) {

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.mojang.logging.LogUtils;
+import com.wildfire.main.cloud.CloudSync;
+import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
 import com.wildfire.main.networking.WildfireSync;
 import net.fabricmc.api.ModInitializer;
@@ -39,6 +41,7 @@ public class WildfireGender implements ModInitializer {
 	public void onInitialize() {
 		WildfireSync.register();
 		WildfireEventHandler.registerCommonEvents();
+		GlobalConfig.INSTANCE.load();
 	}
 
 	public static @Nullable PlayerConfig getPlayerById(UUID id) {

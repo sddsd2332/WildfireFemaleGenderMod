@@ -30,7 +30,6 @@ import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.entitydata.PlayerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.RenderLayer;
@@ -44,6 +43,7 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 	private static final Identifier BACKGROUND_FEMALE = Identifier.of(WildfireGender.MODID, "textures/gui/wardrobe_bg2.png");
 	private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/wardrobe_bg3.png");
 	private static final Identifier TXTR_RIBBON = Identifier.of(WildfireGender.MODID, "textures/bc_ribbon.png");
+	private static final Identifier CLOUD_ICON = Identifier.of(WildfireGender.MODID, "textures/cloud.png");
 	private static final UUID CREATOR_UUID = UUID.fromString("23b6feed-2dfe-4f2e-9429-863fd4adb946");
 	private static final boolean isBreastCancerAwarenessMonth = Calendar.getInstance().get(Calendar.MONTH) == Calendar.OCTOBER;
 
@@ -53,6 +53,7 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 
 	@Override
   	public void init() {
+		final var client = Objects.requireNonNull(this.client);
 	    int y = this.height / 2;
 		PlayerConfig plr = Objects.requireNonNull(getPlayer(), "getPlayer()");
 
@@ -71,13 +72,24 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 
 		if (plr.getGender().canHaveBreasts()) {
 			this.addDrawableChild(new WildfireButton(this.width / 2 - 42, y - 32, 158, 20, Text.translatable("wildfire_gender.appearance_settings.title").append("..."),
-					button -> MinecraftClient.getInstance().setScreen(new WildfireBreastCustomizationScreen(WardrobeBrowserScreen.this, this.playerUUID))));
+					button -> client.setScreen(new WildfireBreastCustomizationScreen(WardrobeBrowserScreen.this, this.playerUUID))));
 		}
 		this.addDrawableChild(new WildfireButton(this.width / 2 - 42, y - (plr.getGender().canHaveBreasts() ? 12 : 32), 158, 20, Text.translatable("wildfire_gender.char_settings.title").append("..."),
-				button -> MinecraftClient.getInstance().setScreen(new WildfireCharacterSettingsScreen(WardrobeBrowserScreen.this, this.playerUUID))));
+				button -> client.setScreen(new WildfireCharacterSettingsScreen(WardrobeBrowserScreen.this, this.playerUUID))));
 
+		var cloud = new WildfireButton(
+				this.width / 2 + 97, y - 63, 12, 9, Text.translatable("wildfire_gender.cloud_settings"),
+				button -> client.setScreen(new WildfireCloudSyncScreen(this, this.playerUUID))
+		) {
+			@Override
+			protected void drawInner(DrawContext ctx, int mouseX, int mouseY, float partialTicks) {
+				ctx.drawTexture(RenderLayer::getGuiTextured, CLOUD_ICON, getX() + 1, getY() + 1, 0, 0, 10, 7, 17, 13, 16, 13);
+			}
+		};
+
+        this.addDrawableChild(cloud);
 		this.addDrawableChild(new WildfireButton(this.width / 2 + 111, y - 63, 9, 9, Text.literal("X"),
-			button -> MinecraftClient.getInstance().setScreen(parent)));
+			button -> client.setScreen(parent)));
 
 	    super.init();
   	}

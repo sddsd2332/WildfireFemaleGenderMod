@@ -45,19 +45,23 @@ public class WildfireButton extends ButtonWidget {
       setTooltip(tooltip);
    }
 
-   @Override
-   protected void renderWidget(DrawContext ctx, int mouseX, int mouseY, float partialTicks) {
+   protected void drawInner(DrawContext ctx, int mouseX, int mouseY, float partialTicks) {
       MinecraftClient minecraft = MinecraftClient.getInstance();
       TextRenderer font = minecraft.textRenderer;
+      int textColor = active ? 0xFFFFFF : 0x666666;
+      int i = this.getX() + 2;
+      int j = this.getX() + this.getWidth() - 2;
+      GuiUtils.drawScrollableTextWithoutShadow(ctx, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), textColor);
+   }
+
+   @Override
+   protected void renderWidget(DrawContext ctx, int mouseX, int mouseY, float partialTicks) {
       int clr = 0x444444 + (84 << 24);
       if(this.isHovered()) clr = 0x666666 + (84 << 24);
       if(!this.active) clr = 0x222222 + (84 << 24);
       if(!transparent) ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), clr);
 
-      int textColor = active ? 0xFFFFFF : 0x666666;
-      int i = this.getX() + 2;
-      int j = this.getX() + this.getWidth() - 2;
-      GuiUtils.drawScrollableTextWithoutShadow(ctx, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), textColor);
+      drawInner(ctx, mouseX, mouseY, partialTicks);
       RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
    }
 

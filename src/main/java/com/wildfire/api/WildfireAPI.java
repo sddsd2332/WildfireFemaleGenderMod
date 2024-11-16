@@ -81,20 +81,16 @@ public class WildfireAPI {
         return cfg.getGender();
     }
 
-    // FIXME this method currently has the limitation of only actually affecting players that are currently cached
     /**
      * <p>Load the cached Gender Settings file for the specified {@link UUID}</p>
      *
      * <p>You should avoid using this unless you need to, as the mod will do this for you when loading a player entity.</p>
      *
-     * @apiNote This method currently has the limitation of only affecting players that are {@link #getPlayerById in the mod's cache},
-     *          and won't load anything otherwise.
-     *
      * @param  uuid  the uuid of the target {@link PlayerEntity}
      * @param  markForSync {@code true} if player data should be synced to the server upon being loaded; this only has an effect on the client player.
      */
     @Environment(EnvType.CLIENT)
-    public static CompletableFuture<@Nullable PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync) {
+    public static CompletableFuture<@NotNull PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync) {
         return WildfireGenderClient.loadGenderInfo(uuid, markForSync);
     }
 

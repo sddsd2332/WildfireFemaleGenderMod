@@ -48,4 +48,9 @@ public abstract class BaseWildfireScreen extends Screen {
     public boolean shouldPause() {
         return false;
     }
+
+    @Override
+    public void close() {
+        client.setScreen(parent);
+    }
 }

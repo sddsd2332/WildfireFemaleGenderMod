@@ -25,6 +25,7 @@ import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.wildfire.api.IGenderArmor;
 import com.wildfire.api.WildfireAPI;
 import com.wildfire.main.config.FloatConfigKey;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import com.wildfire.api.impl.GenderArmor;
@@ -89,5 +90,10 @@ public final class WildfireHelper {
 
     public static Codec<Float> boundedFloat(FloatConfigKey configKey) {
         return boundedFloat(configKey.getMinInclusive(), configKey.getMaxInclusive());
+    }
+
+    public static String getModVersion(String modId) {
+        var mod = FabricLoader.getInstance().getModContainer(modId).orElseThrow();
+        return mod.getMetadata().getVersion().getFriendlyString();
     }
 }
