@@ -50,6 +50,8 @@ public final class CloudSync {
 	}
 
 	private static Instant lastSync = Instant.EPOCH;
+	private static final List<Instant> fetchErrors = new ArrayList<>();
+	private static @Nullable Instant disableUntil;
 
 	private static final Executor EXECUTOR = Util.getIoWorkerExecutor().named("wildfire_gender$cloudSync");
 	private static final Gson GSON = new Gson();
@@ -74,6 +76,15 @@ public final class CloudSync {
 	public static String getCloudServer() {
 		var url = GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SERVER);
 		return url.isBlank() ? DEFAULT_CLOUD_URL : url;
+	}
+
+	private static void markError() {
+		fetchErrors.add(Instant.now());
+		fetchErrors.removeIf(e -> e.plus(10, ChronoUnit.SECONDS).isBefore(Instant.now()));
+		if(fetchErrors.size() >= 10) {
+			WildfireGender.LOGGER.error("Too many recent sync errors, disabling future lookups for 5 minutes");
+			disableUntil = Instant.now().plus(5, ChronoUnit.MINUTES);
+		}
 	}
 
 	private static HttpURLConnection createConnection(URL url) throws IOException {
@@ -164,7 +175,7 @@ public final class CloudSync {
 	}
 
 	public static CompletableFuture<@Nullable JsonObject> getProfile(UUID uuid) {
-		if(!isEnabled()) {
+		if(!isEnabled() || disableUntil != null && disableUntil.isAfter(Instant.now())) {
 			return CompletableFuture.completedFuture(null);
 		}
 
@@ -181,8 +192,10 @@ public final class CloudSync {
 				connection.connect();
 				int code = connection.getResponseCode();
 				if(code == 404) {
+					WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
 					return null;
 				} else if(code >= 400 || code == -1) {
+					markError();
 					throw new RuntimeException("Server responded with " + code + " response code");
 				}
 
@@ -194,6 +207,7 @@ public final class CloudSync {
 
 				return GSON.fromJson(response, JsonObject.class);
 			} catch(IOException e) {
+				markError();
 				throw new RuntimeException(e);
 			}
 		}, EXECUTOR);
