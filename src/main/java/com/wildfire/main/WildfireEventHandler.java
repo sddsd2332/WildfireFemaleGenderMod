@@ -21,6 +21,7 @@ package com.wildfire.main;
 import com.wildfire.gui.screen.BaseWildfireScreen;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
 import com.wildfire.main.cloud.CloudSync;
+import com.wildfire.main.cloud.SyncingTooFrequentlyException;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
@@ -163,7 +164,11 @@ public final class WildfireEventHandler {
 				CloudSync.sync(clientConfig)
 						.thenRun(() -> WildfireGender.LOGGER.info("Synced player data to the cloud"))
 						.exceptionallyAsync(exc -> {
-							WildfireGender.LOGGER.error("Failed to sync player data", exc);
+							if(exc instanceof SyncingTooFrequentlyException) {
+								WildfireGender.LOGGER.warn("Couldn't sync player data as we've already synced too recently");
+							} else {
+								WildfireGender.LOGGER.error("Failed to sync player data", exc);
+							}
 							return null;
 						});
 				clientConfig.needsCloudSync = false;
