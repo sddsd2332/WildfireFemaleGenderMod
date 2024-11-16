@@ -36,6 +36,7 @@ import net.minecraft.util.Identifier;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -117,10 +118,12 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 	public void close() {
 		try {
 			var url = cloudUrl.getText();
-			//noinspection ResultOfMethodCallIgnored
-			URI.create(url).toURL();
+			if(!url.isBlank()) {
+				//noinspection ResultOfMethodCallIgnored
+				new URI(url).toURL();
+			}
 			GlobalConfig.INSTANCE.set(GlobalConfig.CLOUD_SERVER, url);
-		} catch(MalformedURLException e) {
+		} catch(MalformedURLException | URISyntaxException | IllegalArgumentException e) {
 			// invalid url, discard it
 		}
 		GlobalConfig.INSTANCE.save();
