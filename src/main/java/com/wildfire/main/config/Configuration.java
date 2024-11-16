@@ -18,8 +18,6 @@
 
 package com.wildfire.main.config;
 
-import com.google.gson.JsonObject;
-
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 

@@ -178,7 +178,6 @@ public class PlayerConfig extends EntityConfig {
 		breasts.updateCleavage(cfg.get(Configuration.BREASTS_CLEAVAGE));
 		if(markForSync) {
 			this.needsSync = true;
-			this.needsCloudSync = true;
 		}
 	}
 

@@ -65,9 +65,9 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 				}));
 
 		var automaticTooltip = Tooltip.of(Text.empty()
-				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.l1"))
+				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line1"))
 				.append("\n\n")
-				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.l2")));
+				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line2")));
 		this.addDrawableChild(new WildfireButton(xPos - 15, yPos + 22, 80, 20,
 				GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) ? ENABLED : DISABLED,
 				button -> {

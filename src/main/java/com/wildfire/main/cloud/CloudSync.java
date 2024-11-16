@@ -65,14 +65,23 @@ public final class CloudSync {
 	private static final String DEFAULT_CLOUD_URL = "https://wfgm.celestialfault.dev";
 	public static final Duration SYNC_COOLDOWN = Duration.of(15, ChronoUnit.SECONDS);
 
+	/**
+	 * @return {@code true} if the last sync was within the last {@link #SYNC_COOLDOWN 15 seconds}
+	 */
 	public static boolean syncOnCooldown() {
 		return lastSync.plus(SYNC_COOLDOWN).isAfter(Instant.now());
 	}
 
+	/**
+	 * Convenience shorthand for {@code GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED)}
+	 */
 	public static boolean isEnabled() {
 		return GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
 	}
 
+	/**
+	 * @return The URL of the sync server currently being used
+	 */
 	public static String getCloudServer() {
 		var url = GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SERVER);
 		return url.isBlank() ? DEFAULT_CLOUD_URL : url;
@@ -114,7 +123,15 @@ public final class CloudSync {
 		}
 	}
 
-	public static CompletableFuture<Void> sync(@NotNull PlayerConfig config) {
+	/**
+	 * Send the client player config to the cloud sync server for syncing to other players
+	 *
+	 * @param config The config of the client player
+	 *
+	 * @return A {@link CompletableFuture} indicating when the process has finished, or with an exception if
+	 *         syncing failed.
+	 */
+	public static synchronized CompletableFuture<Void> sync(@NotNull PlayerConfig config) {
 		if(!isEnabled()) {
 			return CompletableFuture.completedFuture(null);
 		}
@@ -174,6 +191,14 @@ public final class CloudSync {
 		}, EXECUTOR);
 	}
 
+	/**
+	 * Fetch player data from the sync server
+	 *
+	 * @param uuid The UUID of the player to get data for
+	 *
+	 * @return A {@link CompletableFuture} containing a {@link JsonObject} of the player's data if they have any data
+	 * 		   stored in the sync server, or {@code null} otherwise.
+	 */
 	public static CompletableFuture<@Nullable JsonObject> getProfile(UUID uuid) {
 		if(!isEnabled() || disableUntil != null && disableUntil.isAfter(Instant.now())) {
 			return CompletableFuture.completedFuture(null);
