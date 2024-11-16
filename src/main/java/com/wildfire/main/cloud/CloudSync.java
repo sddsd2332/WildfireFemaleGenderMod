@@ -196,7 +196,11 @@ public final class CloudSync {
 					return null;
 				} else if(code >= 400 || code == -1) {
 					markError();
-					throw new RuntimeException("Server responded with " + code + " response code");
+					String response;
+					try(var stream = connection.getErrorStream()) {
+						response = IOUtils.toString(stream, StandardCharsets.UTF_8);
+					}
+					throw new RuntimeException("Server responded " + connection.getResponseMessage() + ": " + response);
 				}
 
 				String response;
