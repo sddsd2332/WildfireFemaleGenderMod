@@ -52,7 +52,7 @@ public class WildfireGenderClient implements ClientModInitializer {
 			var player = WildfireGender.getOrAddPlayerById(uuid);
 			if(player.hasLocalConfig()) {
 				player.loadFromDisk(markForSync);
-			} else {
+			} else if(player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
 				JsonObject data;
 				try {
 					data = CloudSync.getProfile(uuid).join();
@@ -60,6 +60,8 @@ public class WildfireGenderClient implements ClientModInitializer {
 					WildfireGender.LOGGER.error("Failed to fetch profile from sync server", e);
 					throw e;
 				}
+				// make sure the server we're connected to hasn't provided player data while we were fetching data from
+				// the sync server
 				if(data != null && player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
 					player.updateFromJson(data);
 				}

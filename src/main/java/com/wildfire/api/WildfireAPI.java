@@ -82,9 +82,14 @@ public class WildfireAPI {
     }
 
     /**
-     * <p>Load the cached Gender Settings file for the specified {@link UUID}</p>
+     * <p>Load data for the provided player UUID</p>
      *
-     * <p>You should avoid using this unless you need to, as the mod will do this for you when loading a player entity.</p>
+     * <p>This attempts to load a local config file for the provided UUID, before falling back to making a
+     * request to the {@link com.wildfire.main.cloud.CloudSync cloud sync} server for it
+     * (if cloud syncing is enabled).</p>
+     *
+     * <p>Note that you should generally avoid using this unless you know that you need to, as the mod already runs
+     * this load process when the relevant player entity is spawned in the world.</p>
      *
      * @param  uuid  the uuid of the target {@link PlayerEntity}
      * @param  markForSync {@code true} if player data should be synced to the server upon being loaded; this only has an effect on the client player.
