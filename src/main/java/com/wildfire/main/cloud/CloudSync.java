@@ -27,6 +27,7 @@ import com.wildfire.main.WildfireHelper;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.session.Session;
 import net.minecraft.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -72,9 +73,12 @@ public final class CloudSync {
 	}
 
 	/**
-	 * Convenience shorthand for {@code GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED)}
+	 * @return {@code true} if syncing should be enabled
 	 */
 	public static boolean isEnabled() {
+		if(MinecraftClient.getInstance().getSession().getAccountType() != Session.AccountType.MSA) {
+			return false;
+		}
 		return GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
 	}
 
