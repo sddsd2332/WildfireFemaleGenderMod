@@ -18,6 +18,7 @@
 
 package com.wildfire.main.cloud;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.HttpAuthenticationService;
@@ -26,6 +27,8 @@ import com.wildfire.main.WildfireGender;
 import com.wildfire.main.WildfireHelper;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.session.Session;
 import net.minecraft.util.Util;
@@ -45,10 +48,14 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@Environment(EnvType.CLIENT)
 public final class CloudSync {
 	private CloudSync() {
 		throw new UnsupportedOperationException();
 	}
+
+	@SuppressWarnings("UnstableApiUsage")
+	private static final RateLimiter rateLimiter = RateLimiter.create(5);
 
 	private static Instant lastSync = Instant.EPOCH;
 	private static final List<Instant> fetchErrors = new ArrayList<>();
@@ -185,8 +192,15 @@ public final class CloudSync {
 		if(!isEnabled() || disableFetchingUntil != null && disableFetchingUntil.isAfter(Instant.now())) {
 			return CompletableFuture.completedFuture(null);
 		}
+		if(uuid.version() != 4) {
+			// some servers (namely hypixel) use non-v4 uuids for their npcs
+			return CompletableFuture.completedFuture(null);
+		}
 
 		return CompletableFuture.supplyAsync(() -> {
+			//noinspection UnstableApiUsage
+			rateLimiter.acquire();
+
 			URI url = URI.create(getCloudServer() + "/" + uuid);
 
 			var request = createConnection(url).GET().build();
