@@ -27,11 +27,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.wildfire.gui.WildfireButton;
+import com.wildfire.main.cloud.CloudSync;
 import com.wildfire.main.entitydata.PlayerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
@@ -77,6 +79,7 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 		this.addDrawableChild(new WildfireButton(this.width / 2 - 42, y - (plr.getGender().canHaveBreasts() ? 12 : 32), 158, 20, Text.translatable("wildfire_gender.char_settings.title").append("..."),
 				button -> client.setScreen(new WildfireCharacterSettingsScreen(WardrobeBrowserScreen.this, this.playerUUID))));
 
+		//noinspection ExtractMethodRecommender
 		var cloud = new WildfireButton(
 				this.width / 2 + 97, y - 63, 12, 9, Text.translatable("wildfire_gender.cloud_settings"),
 				button -> client.setScreen(new WildfireCloudSyncScreen(this, this.playerUUID))
@@ -87,7 +90,12 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 			}
 		};
 
-        this.addDrawableChild(cloud);
+		if(!CloudSync.isAvailable()) {
+			cloud.setTooltip(Tooltip.of(Text.translatable("wildfire_gender.cloud.unavailable_offline")));
+			cloud.setActive(false);
+		}
+
+		this.addDrawableChild(cloud);
 		this.addDrawableChild(new WildfireButton(this.width / 2 + 111, y - 63, 9, 9, Text.literal("X"),
 			button -> client.setScreen(parent)));
 

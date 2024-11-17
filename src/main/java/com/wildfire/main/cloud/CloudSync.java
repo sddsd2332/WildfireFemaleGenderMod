@@ -73,13 +73,17 @@ public final class CloudSync {
 	}
 
 	/**
-	 * @return {@code true} if syncing should be enabled
+	 * @return {@code true} if syncing is available; currently, this only checks for a valid Minecraft session.
+	 */
+	public static boolean isAvailable() {
+		return MinecraftClient.getInstance().getSession().getAccountType() == Session.AccountType.MSA;
+	}
+
+	/**
+	 * @return {@code true} if syncing is enabled; this will always return {@code false} if {@link #isAvailable() syncing is unavailable}.
 	 */
 	public static boolean isEnabled() {
-		if(MinecraftClient.getInstance().getSession().getAccountType() != Session.AccountType.MSA) {
-			return false;
-		}
-		return GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
+		return isAvailable() && GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
 	}
 
 	/**
