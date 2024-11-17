@@ -18,6 +18,7 @@
 
 package com.wildfire.gui.screen;
 
+import com.wildfire.gui.GuiUtils;
 import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.cloud.CloudSync;
@@ -92,8 +93,7 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 		this.addDrawableChild(syncButton);
 
 		this.addDrawableChild(new WildfireButton(this.width / 2 + 85, yPos - 11, 9, 9, Text.literal("X"),
-				button -> close(),
-				text -> Text.translatable("gui.narrate.button", Text.translatable("gui.done"))));
+				button -> close(), text -> GuiUtils.doneNarrationText()));
 
 		super.init();
 	}

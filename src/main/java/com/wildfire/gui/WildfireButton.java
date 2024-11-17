@@ -58,7 +58,7 @@ public class WildfireButton extends ButtonWidget {
    protected void renderWidget(DrawContext ctx, int mouseX, int mouseY, float partialTicks) {
       int clr = 0x444444 + (84 << 24);
       if(this.isHovered()) clr = 0x666666 + (84 << 24);
-      if(!this.active) clr = 0x222222 + (84 << 24);
+      if(!isSelected()) clr = 0x222222 + (84 << 24);
       if(!transparent) ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), clr);
 
       drawInner(ctx, mouseX, mouseY, partialTicks);

@@ -24,6 +24,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
@@ -39,6 +40,10 @@ import java.util.Objects;
 public final class GuiUtils {
 	private GuiUtils() {
 		throw new UnsupportedOperationException();
+	}
+
+	public static MutableText doneNarrationText() {
+		return Text.translatable("gui.narrate.button", Text.translatable("gui.done"));
 	}
 
 	// Reimplementation of DrawContext#drawCenteredTextWithShadow but with the text shadow removed

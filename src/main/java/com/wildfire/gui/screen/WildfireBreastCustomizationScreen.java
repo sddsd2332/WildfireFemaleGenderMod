@@ -30,7 +30,6 @@ import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -64,9 +63,6 @@ public class WildfireBreastCustomizationScreen extends BaseWildfireScreen {
             //Just save as we updated the actual value in value change
             PlayerConfig.saveGenderInfo(plr);
         };
-
-        this.addDrawableChild(new WildfireButton(this.width / 2 + 178, j - 72, 9, 9, Text.literal("X"),
-              button -> MinecraftClient.getInstance().setScreen(parent)));
 
         //Customization Tab
         this.addDrawableChild(btnCustomization = new WildfireButton(this.width / 2 + 30, j - 60, 158, 10,
@@ -143,6 +139,9 @@ public class WildfireBreastCustomizationScreen extends BaseWildfireScreen {
         PRESET_LIST.setHeight(125);
 
         this.addSelectableChild(this.PRESET_LIST);
+
+        this.addDrawableChild(new WildfireButton(this.width / 2 + 178, j - 72, 9, 9, Text.literal("X"),
+                button -> close(), text -> GuiUtils.doneNarrationText()));
 
         this.currentTab = 0;
 
