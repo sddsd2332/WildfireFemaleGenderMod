@@ -102,6 +102,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
+        this.bounceSlider.setArrowKeyStep(0.005);
 
         this.addDrawableChild(this.floppySlider = new WildfireSlider(xPos, yPos + 80, 158, 20, Configuration.FLOPPY_MULTIPLIER, aPlr.getFloppiness(), value -> {
         }, value -> Text.translatable("wildfire_gender.slider.floppy", Math.round(value * 100)), value -> {
@@ -109,6 +110,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
+        this.floppySlider.setArrowKeyStep(0.01);
 
         this.addDrawableChild(new WildfireButton(xPos, yPos + 100, 157, 20,
                 Text.translatable("wildfire_gender.char_settings.hurt_sounds", aPlr.hasHurtSounds() ? ENABLED : DISABLED), button -> {
