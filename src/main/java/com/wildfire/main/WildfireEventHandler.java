@@ -20,6 +20,7 @@ package com.wildfire.main;
 
 import com.wildfire.gui.screen.BaseWildfireScreen;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
+import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
 import com.wildfire.main.cloud.CloudSync;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.EntityConfig;
@@ -173,7 +174,11 @@ public final class WildfireEventHandler {
 		}
 
 		if(CONFIG_KEYBIND.wasPressed() && client.currentScreen == null) {
-			client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
+			if(GlobalConfig.INSTANCE.get(GlobalConfig.FIRST_TIME_LOAD)) {
+				client.setScreen(new WildfireFirstTimeSetupScreen(null, client.player.getUuid()));
+			} else {
+				client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
+			}
 		}
 	}
 

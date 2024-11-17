@@ -24,12 +24,15 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
@@ -40,8 +43,23 @@ public final class GuiUtils {
 
 	// Reimplementation of DrawContext#drawCenteredTextWithShadow but with the text shadow removed
 	public static void drawCenteredText(DrawContext ctx, TextRenderer textRenderer, Text text, int x, int y, int color) {
-	    int centeredX = x - textRenderer.getWidth(text) / 2;
-	    ctx.drawText(textRenderer, text, centeredX, y, color, false);
+		int centeredX = x - textRenderer.getWidth(text) / 2;
+		ctx.drawText(textRenderer, text, centeredX, y, color, false);
+	}
+
+
+	public static void drawCenteredText(DrawContext ctx, TextRenderer textRenderer, OrderedText text, int x, int y, int color) {
+		int centeredX = x - textRenderer.getWidth(text) / 2;
+		ctx.drawText(textRenderer, text, centeredX, y, color, false);
+	}
+
+	public static void drawCenteredTextWrapped(DrawContext ctx, TextRenderer textRenderer, StringVisitable text, int x, int y, int width, int color) {
+		for(Iterator var7 = textRenderer.wrapLines(text, width).iterator(); var7.hasNext(); y += 9) {
+			OrderedText orderedText = (OrderedText)var7.next();
+			GuiUtils.drawCenteredText(ctx, textRenderer, orderedText, x, y, color);
+			Objects.requireNonNull(textRenderer);
+		}
+
 	}
 
 	// Reimplementation of ClickableWidget#drawScrollableText but with the text shadow removed
