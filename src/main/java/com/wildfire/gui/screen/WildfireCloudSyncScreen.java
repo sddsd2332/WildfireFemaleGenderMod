@@ -57,32 +57,43 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 		int yPos = y - 44;
 		int xPos = x + 60 / 2 - 1;
 
-		this.addDrawableChild(new WildfireButton(this.width / 2 + 85, yPos - 11, 9, 9, Text.literal("X"), button -> close()));
-
 		this.addDrawableChild(new WildfireButton(xPos - 15, yPos, 80, 20,
 				CloudSync.isEnabled() ? ENABLED : DISABLED,
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, !config.get(GlobalConfig.CLOUD_SYNC_ENABLED));
 					button.setMessage(CloudSync.isEnabled() ? ENABLED : DISABLED);
-				}));
+				},
+				text -> Text.empty()
+						.append(Text.translatable("wildfire_gender.cloud.status"))
+						.append(" ")
+						.append(text.get())));
 
-		var automaticTooltip = Tooltip.of(Text.empty()
-				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line1"))
-				.append("\n\n")
-				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line2")));
-		this.addDrawableChild(new WildfireButton(xPos - 15, yPos + 22, 80, 20,
+		WildfireButton automatic;
+		this.addDrawableChild(automatic = new WildfireButton(xPos - 15, yPos + 22, 80, 20,
 				GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) ? ENABLED : DISABLED,
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					var newVal = !config.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, newVal);
 					button.setMessage(newVal ? ENABLED : DISABLED);
-				}, automaticTooltip));
+				},
+				text -> Text.empty()
+						.append(Text.translatable("wildfire_gender.cloud.automatic"))
+						.append(" ")
+						.append(text.get())));
+		automatic.setTooltip(Tooltip.of(Text.empty()
+				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line1"))
+				.append("\n\n")
+				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line2"))));
 
 		var syncButton = new WildfireButton(xPos - 80, yPos + 80, 100, 15, Text.translatable("wildfire_gender.cloud.sync"), this::sync);
 		syncButton.setActive(GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED));
 		this.addDrawableChild(syncButton);
+
+		this.addDrawableChild(new WildfireButton(this.width / 2 + 85, yPos - 11, 9, 9, Text.literal("X"),
+				button -> close(),
+				text -> Text.translatable("gui.narrate.button", Text.translatable("gui.done"))));
 
 		super.init();
 	}
