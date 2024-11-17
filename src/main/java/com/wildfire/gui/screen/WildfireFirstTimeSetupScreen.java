@@ -26,6 +26,7 @@ import com.wildfire.main.cloud.SyncingTooFrequentlyException;
 import com.wildfire.main.config.GlobalConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -73,8 +74,13 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 				Text.of("Yes"),
 				button -> {
 					var config = GlobalConfig.INSTANCE;
+					//Enable both settings, they can always disable automatic later? TBD
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, true);
-					//also set first time setup false
+					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, true);
+					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
+					config.save();
+
+					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
 				}));
 
 
@@ -83,7 +89,11 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, false);
-					//also set first time setup false
+					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, false);
+					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
+					config.save();
+
+					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
 				}));
 
 		super.init();
