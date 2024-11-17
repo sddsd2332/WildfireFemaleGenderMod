@@ -33,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -103,7 +102,7 @@ public final class CloudSync {
 		}
 	}
 
-	private static HttpRequest.Builder createConnection(URI uri) throws IOException {
+	private static HttpRequest.Builder createConnection(URI uri) {
 		WildfireGender.LOGGER.debug("Connecting to {}", uri);
 		return HttpRequest.newBuilder(uri)
 				.header("User-Agent", USER_AGENT)
@@ -162,19 +161,15 @@ public final class CloudSync {
 			URI url = URI.create(getCloudServer() + "/" + config.uuid + "?" + params);
 			beginAuth(serverId);
 
-			try {
-				var request = createConnection(url)
-						.PUT(HttpRequest.BodyPublishers.ofString(json))
-						.header("Content-Type", "application/json; charset=UTF-8")
-						.build();
-				var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
-				if(response.statusCode() >= 400) {
-					throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
-				}
-				WildfireGender.LOGGER.debug("Server responded to update: {}", response.body());
-			} catch(IOException e) {
-				throw new RuntimeException(e);
+			var request = createConnection(url)
+					.PUT(HttpRequest.BodyPublishers.ofString(json))
+					.header("Content-Type", "application/json; charset=UTF-8")
+					.build();
+			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
+			if(response.statusCode() >= 400) {
+				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
+			WildfireGender.LOGGER.debug("Server responded to update: {}", response.body());
 		}, EXECUTOR);
 	}
 
@@ -194,22 +189,17 @@ public final class CloudSync {
 		return CompletableFuture.supplyAsync(() -> {
 			URI url = URI.create(getCloudServer() + "/" + uuid);
 
-			try {
-				var request = createConnection(url).GET().build();
-				var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
-				if(response.statusCode() == 404) {
-					WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
-					return null;
-				} else if(response.statusCode() >= 400) {
-					markFetchError();
-					throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
-				}
-
-				return GSON.fromJson(response.body(), JsonObject.class);
-			} catch(IOException e) {
+			var request = createConnection(url).GET().build();
+			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
+			if(response.statusCode() == 404) {
+				WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
+				return null;
+			} else if(response.statusCode() >= 400) {
 				markFetchError();
-				throw new RuntimeException(e);
+				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
+
+			return GSON.fromJson(response.body(), JsonObject.class);
 		}, EXECUTOR);
 	}
 }
