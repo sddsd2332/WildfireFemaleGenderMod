@@ -60,6 +60,7 @@
 	"wildfire_gender.coming_soon": "Coming soon",
 
 	"wildfire_gender.cloud_settings": "Cloud Sync Settings",
+	"wildfire_gender.cloud.unavailable_offline": "Cloud syncing is unavailable as you aren't currently logged into a valid Minecraft account",
 	"wildfire_gender.cloud.status": "Syncing:",
 	"wildfire_gender.cloud.automatic": "Automatic Sync:",
 	"wildfire_gender.cloud.automatic.tooltip.line1": "While enabled, your config will automatically be synced to the cloud after making any changes.",

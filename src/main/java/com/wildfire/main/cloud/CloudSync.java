@@ -27,16 +27,17 @@ import com.wildfire.main.WildfireHelper;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.session.Session;
 import net.minecraft.util.Util;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -55,12 +56,10 @@ public final class CloudSync {
 
 	private static final Executor EXECUTOR = Util.getIoWorkerExecutor().named("wildfire_gender$cloudSync");
 	private static final Gson GSON = new Gson();
+	private static final HttpClient CLIENT = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 	private static final String USER_AGENT =
 			"WildfireGender/" + StringUtils.split(WildfireHelper.getModVersion(WildfireGender.MODID), '+')[0]
 					+ " Minecraft/" + WildfireHelper.getModVersion("minecraft");
-
-	private static final int CONNECT_TIMEOUT_MS = 5000;
-	private static final int READ_TIMEOUT_MS = 5000;
 
 	private static final String DEFAULT_CLOUD_URL = "https://wfgm.celestialfault.dev";
 	public static final Duration SYNC_COOLDOWN = Duration.of(15, ChronoUnit.SECONDS);
@@ -73,10 +72,17 @@ public final class CloudSync {
 	}
 
 	/**
-	 * Convenience shorthand for {@code GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED)}
+	 * @return {@code true} if syncing is available; currently, this only checks for a valid Minecraft session.
+	 */
+	public static boolean isAvailable() {
+		return MinecraftClient.getInstance().getSession().getAccountType() == Session.AccountType.MSA;
+	}
+
+	/**
+	 * @return {@code true} if syncing is enabled; this will always return {@code false} if {@link #isAvailable() syncing is unavailable}.
 	 */
 	public static boolean isEnabled() {
-		return GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
+		return isAvailable() && GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
 	}
 
 	/**
@@ -96,14 +102,11 @@ public final class CloudSync {
 		}
 	}
 
-	private static HttpURLConnection createConnection(URL url) throws IOException {
-		WildfireGender.LOGGER.debug("Connecting to {}", url);
-		final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-		connection.setReadTimeout(READ_TIMEOUT_MS);
-		connection.setUseCaches(false);
-		connection.setRequestProperty("User-Agent", USER_AGENT);
-		return connection;
+	private static HttpRequest.Builder createConnection(URI uri) {
+		WildfireGender.LOGGER.debug("Connecting to {}", uri);
+		return HttpRequest.newBuilder(uri)
+				.header("User-Agent", USER_AGENT)
+				.timeout(Duration.ofSeconds(5));
 	}
 
 	private static String generateServerId() {
@@ -146,7 +149,7 @@ public final class CloudSync {
 
 		var client = MinecraftClient.getInstance();
 		var username = client.getSession().getUsername();
-		var json = config.toJson().toString().getBytes(StandardCharsets.UTF_8);
+		var json = config.toJson().toString();
 		var serverId = generateServerId();
 
 		return CompletableFuture.runAsync(() -> {
@@ -155,39 +158,18 @@ public final class CloudSync {
 					"username", username
 			));
 
-			URL url;
-			try {
-				url = URI.create(getCloudServer() + "/" + config.uuid + "?" + params).toURL();
-			} catch(MalformedURLException e) {
-				throw new RuntimeException(e);
-			}
+			URI url = URI.create(getCloudServer() + "/" + config.uuid + "?" + params);
 			beginAuth(serverId);
 
-			try {
-				var connection = createConnection(url);
-				connection.setRequestMethod("PUT");
-				connection.setDoOutput(true);
-				connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-				connection.setFixedLengthStreamingMode(json.length);
-				connection.connect();
-				try(var out = connection.getOutputStream()) {
-					out.write(json);
-				}
-				int code = connection.getResponseCode();
-				if(code >= 400 || code == -1) {
-					String response;
-					try(var stream = connection.getErrorStream()) {
-						response = IOUtils.toString(stream, StandardCharsets.UTF_8);
-					}
-					throw new RuntimeException("Server returned " + code + " response code: " + response);
-				}
-				try(var stream = connection.getInputStream()) {
-					var response = IOUtils.toString(stream, StandardCharsets.UTF_8);
-					WildfireGender.LOGGER.debug("Server replied to update: {}", response);
-				}
-			} catch(IOException e) {
-				throw new RuntimeException(e);
+			var request = createConnection(url)
+					.PUT(HttpRequest.BodyPublishers.ofString(json))
+					.header("Content-Type", "application/json; charset=UTF-8")
+					.build();
+			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
+			if(response.statusCode() >= 400) {
+				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
+			WildfireGender.LOGGER.debug("Server responded to update: {}", response.body());
 		}, EXECUTOR);
 	}
 
@@ -205,40 +187,19 @@ public final class CloudSync {
 		}
 
 		return CompletableFuture.supplyAsync(() -> {
-			URL url;
-			try {
-				url = URI.create(getCloudServer() + "/" + uuid).toURL();
-			} catch(MalformedURLException e) {
-				throw new RuntimeException(e);
-			}
+			URI url = URI.create(getCloudServer() + "/" + uuid);
 
-			try {
-				var connection = createConnection(url);
-				connection.connect();
-				int code = connection.getResponseCode();
-				if(code == 404) {
-					WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
-					return null;
-				} else if(code >= 400 || code == -1) {
-					markFetchError();
-					String response;
-					try(var stream = connection.getErrorStream()) {
-						response = IOUtils.toString(stream, StandardCharsets.UTF_8);
-					}
-					throw new RuntimeException("Server responded " + connection.getResponseMessage() + ": " + response);
-				}
-
-				String response;
-				try(var stream = connection.getInputStream()) {
-					response = IOUtils.toString(stream, StandardCharsets.UTF_8);
-					WildfireGender.LOGGER.debug("Server response for {}: {}", uuid, response);
-				}
-
-				return GSON.fromJson(response, JsonObject.class);
-			} catch(IOException e) {
+			var request = createConnection(url).GET().build();
+			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
+			if(response.statusCode() == 404) {
+				WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
+				return null;
+			} else if(response.statusCode() >= 400) {
 				markFetchError();
-				throw new RuntimeException(e);
+				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
+
+			return GSON.fromJson(response.body(), JsonObject.class);
 		}, EXECUTOR);
 	}
 }
