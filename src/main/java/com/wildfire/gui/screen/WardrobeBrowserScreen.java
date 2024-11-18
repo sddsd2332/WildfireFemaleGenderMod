@@ -190,6 +190,7 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 
 	private List<PlayerListEntry> collectPlayerEntries() {
 		return this.client.player.networkHandler.getListedPlayerListEntries().stream()
+				.filter(entry -> !entry.getProfile().getId().equals(client.player.getUuid()))
 				.filter(entry -> {
 					var cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
 					return cfg != null && cfg.getSyncStatus() != PlayerConfig.SyncStatus.UNKNOWN;
