@@ -20,9 +20,9 @@ package com.wildfire.main.cloud;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.RateLimiter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.HttpAuthenticationService;
 import com.mojang.authlib.exceptions.AuthenticationException;
@@ -38,6 +38,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.session.Session;
 import net.minecraft.util.Util;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,8 +52,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
+import java.util.concurrent.*;
 
 @Environment(EnvType.CLIENT)
 public final class CloudSync {
@@ -80,19 +80,12 @@ public final class CloudSync {
 			"WildfireGender/" + StringUtils.split(WildfireHelper.getModVersion(WildfireGender.MODID), '+')[0]
 					+ " Minecraft/" + WildfireHelper.getModVersion("minecraft");
 
-	@SuppressWarnings("UnstableApiUsage")
-	private static final RateLimiter RATE_LIMITER = RateLimiter.create(5);
+	private static final Queue<QueuedFetch> QUEUED = new ConcurrentLinkedDeque<>();
 	private static final Cache<UUID, Optional<JsonObject>> FETCH_CACHE = CacheBuilder.newBuilder()
-			.expireAfterAccess(Duration.ofMinutes(5))
-			.maximumSize(256)
-			.concurrencyLevel(6) // rate limit + 1
-			.build();
+			.expireAfterAccess(Duration.ofMinutes(10)).maximumSize(512).concurrencyLevel(6).build();
 
 	private static final String DEFAULT_CLOUD_URL = "https://wfgm.celestialfault.dev";
 	private static final Duration SYNC_COOLDOWN = Duration.ofSeconds(10);
-	// Assume that authentication tokens have already expired if they're due to expire within 30 seconds to account
-	// for potential clock drift and network latency
-	private static final Duration AUTH_INVALIDATION_ADJUSTMENT = Duration.ofSeconds(30);
 
 	private static boolean useHttp1_1() {
 		// FIXME this is a terrible workaround to a really dumb issue.
@@ -188,7 +181,7 @@ public final class CloudSync {
 				if(client.player != null && !auth.account().equals(client.player.getUuid())) {
 					WildfireGender.LOGGER.warn("Authenticated account {} does not match the current player ({}); you likely have a misbehaving account switcher mod installed!", auth.account(), client.player.getUuid());
 				}
-				WildfireGender.LOGGER.info("Obtained authentication token for {}, expiry {}", auth.account, auth.expires);
+				WildfireGender.LOGGER.info("Obtained authentication token for {}, expiry {}", auth.account(), auth.expires());
 			}
 		}
 		return auth.token();
@@ -268,13 +261,7 @@ public final class CloudSync {
 		}
 
 		return CompletableFuture.supplyAsync(() -> {
-			//noinspection UnstableApiUsage
-			RATE_LIMITER.acquire();
-			// check again to be sure, as we might've had to wait for the above rate limit
-			if(isFetchingDisabled()) return null;
-
-			URI url = URI.create(getCloudServer() + "/" + uuid);
-
+			var url = URI.create(getCloudServer() + "/" + uuid);
 			var request = createRequest(url).GET().build();
 			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
 			if(response.statusCode() == 404) {
@@ -292,9 +279,99 @@ public final class CloudSync {
 		}, EXECUTOR);
 	}
 
-	record CloudAuth(boolean success, String token, UUID account, Instant expires) {
-		boolean isExpired() {
-			return expires.minus(AUTH_INVALIDATION_ADJUSTMENT).isBefore(Instant.now());
+	/**
+	 * Fetch data for multiple players from the sync server
+	 *
+	 * @param uuids A collection of between 1 and 20 UUIDs to fetch player data for
+	 *
+	 * @return A {@link CompletableFuture} containing a map of player UUIDs to their synced data; any provided
+	 *         player UUIDs without any sync data will not be included in the returned map.
+	 */
+	public static CompletableFuture<Map<UUID, JsonObject>> getMultiple(Collection<UUID> uuids) {
+		return CompletableFuture.supplyAsync(() -> {
+			if(isFetchingDisabled()) {
+				return Collections.emptyMap();
+			}
+
+			var url = URI.create(getCloudServer() + "/");
+			var json = new JsonArray();
+			uuids.forEach(uuid -> json.add(uuid.toString()));
+			var request = createRequest(url)
+					.POST(HttpRequest.BodyPublishers.ofString(json.toString()))
+					.header("Content-Type", "application/json; charset=UTF-8")
+					.build();
+			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
+			if(response.statusCode() >= 400) {
+				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
+			}
+
+			var data = GSON.fromJson(response.body(), BulkFetch.class).users();
+			uuids.forEach(uuid -> FETCH_CACHE.put(uuid, Optional.ofNullable(data.get(uuid))));
+			return data;
+		}, EXECUTOR);
+	}
+
+	/**
+	 * Add a UUID to the fetch queue; this may be requested individually or in bulk, depending on how many other
+	 * users are queued to be fetched.
+	 *
+	 * @param uuid The UUID of the user to fetch
+	 *
+	 * @return A {@link CompletableFuture} containing a {@link JsonObject} of the relevant player data,
+	 *         which will be completed once the next queued batch is finished.
+	 */
+	public static CompletableFuture<@Nullable JsonObject> queueFetch(UUID uuid) {
+		var cached = FETCH_CACHE.getIfPresent(uuid);
+		//noinspection OptionalAssignedToNull
+		if(cached != null) {
+			return CompletableFuture.completedFuture(cached.orElse(null));
 		}
+
+		var future = new CompletableFuture<@Nullable JsonObject>();
+		QUEUED.add(new QueuedFetch(uuid, future));
+		return future;
+	}
+
+	@ApiStatus.Internal
+	public static void sendNextQueueBatch() {
+		if(QUEUED.isEmpty()) {
+			return;
+		}
+
+		final var toFetch = new ArrayList<QueuedFetch>();
+		for(int i = 0; i < 20; i++) {
+			var next = QUEUED.poll();
+			if(next == null) break;
+			toFetch.add(next);
+		}
+
+		// If there's 3 or fewer players in the queue, just send them all individually so that the requests
+		// can be cached easier
+		if(toFetch.size() < 4) {
+			WildfireGender.LOGGER.debug("Sending {} queued sync queries", toFetch.size());
+			toFetch.forEach(queued -> CompletableFuture.runAsync(() -> {
+				try {
+					queued.future().complete(getProfile(queued.uuid()).join());
+				} catch(Exception e) {
+					var actualException = e instanceof CompletionException ce ? ce.getCause() : e;
+					queued.future().completeExceptionally(actualException);
+				}
+			}));
+			return;
+		}
+
+		WildfireGender.LOGGER.debug("Fetching sync data for {} players in bulk", toFetch.size());
+		CompletableFuture.runAsync(() -> {
+			Map<UUID, JsonObject> result;
+			try {
+				result = getMultiple(toFetch.stream().map(QueuedFetch::uuid).toList()).join();
+			} catch(Exception e) {
+				var actualException = e instanceof CompletionException ce ? ce.getCause() : e;
+				toFetch.forEach(queued -> queued.future().completeExceptionally(actualException));
+				return;
+			}
+
+			toFetch.forEach(queued -> queued.future().complete(result.get(queued.uuid())));
+		});
 	}
 }

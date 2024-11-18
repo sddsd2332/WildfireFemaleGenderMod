@@ -21,7 +21,6 @@ package com.wildfire.main;
 import java.util.*;
 
 import com.mojang.logging.LogUtils;
-import com.wildfire.main.cloud.CloudSync;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
 import com.wildfire.main.networking.WildfireSync;

@@ -55,7 +55,7 @@ public class WildfireGenderClient implements ClientModInitializer {
 			} else if(player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
 				JsonObject data;
 				try {
-					data = CloudSync.getProfile(uuid).join();
+					data = CloudSync.queueFetch(uuid).join();
 				} catch(Exception e) {
 					WildfireGender.LOGGER.error("Failed to fetch profile from sync server", e);
 					throw e;

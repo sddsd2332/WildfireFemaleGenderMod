@@ -159,17 +159,20 @@ public final class WildfireEventHandler {
 			if(clientConfig != null) WildfireSync.sendToServer(clientConfig);
 		}
 
-		if(timer % 40 == 0 && clientConfig != null && clientConfig.needsCloudSync && !(client.currentScreen instanceof BaseWildfireScreen)) {
-			if(GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) && !CloudSync.syncOnCooldown()) {
-				CompletableFuture.runAsync(() -> {
-					try {
-						CloudSync.sync(clientConfig).join();
-						WildfireGender.LOGGER.info("Synced player data to the cloud");
-					} catch(Exception e) {
-						WildfireGender.LOGGER.error("Failed to sync player data", e);
-					}
-				});
-				clientConfig.needsCloudSync = false;
+		if(timer % 40 == 0) {
+			CloudSync.sendNextQueueBatch();
+			if(clientConfig != null && clientConfig.needsCloudSync && !(client.currentScreen instanceof BaseWildfireScreen)) {
+				if(GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) && !CloudSync.syncOnCooldown()) {
+					CompletableFuture.runAsync(() -> {
+						try {
+							CloudSync.sync(clientConfig).join();
+							WildfireGender.LOGGER.info("Synced player data to the cloud");
+						} catch(Exception e) {
+							WildfireGender.LOGGER.error("Failed to sync player data", e);
+						}
+					});
+					clientConfig.needsCloudSync = false;
+				}
 			}
 		}
 
