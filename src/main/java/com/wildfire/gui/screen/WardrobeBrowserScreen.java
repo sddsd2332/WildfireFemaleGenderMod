@@ -166,16 +166,16 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 
 			List<PlayerListEntry> playerListEntry = collectPlayerEntries();
 
-			ctx.drawText(textRenderer, Text.literal("Players Using the Mod").formatted(Formatting.AQUA), 5,5, 0xFFFFFF, false);
+			if(!playerListEntry.isEmpty()) {
+				ctx.drawText(textRenderer, Text.literal("Players Using the Mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
+			}
 
 
 			int yPos = 18;
 			for(PlayerListEntry entry : playerListEntry) {
 				PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
-				if(cfg != null) { //if it is null, they aren't using the mod, so just skip them.
-					ctx.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
-					yPos += 10;
-				}
+				ctx.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
+				yPos += 10;
 			}
 		}
 
@@ -189,6 +189,12 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 
 
 	private List<PlayerListEntry> collectPlayerEntries() {
-		return this.client.player.networkHandler.getListedPlayerListEntries().stream().limit(40L).toList();
+		return this.client.player.networkHandler.getListedPlayerListEntries().stream()
+				.filter(entry -> {
+					var cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
+					return cfg != null && cfg.getSyncStatus() != PlayerConfig.SyncStatus.UNKNOWN;
+				})
+				.limit(40L)
+				.toList();
 	}
 }
