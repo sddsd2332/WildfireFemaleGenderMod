@@ -211,6 +211,10 @@ public final class CloudSync {
 			lastSync = Instant.now();
 		}
 
+		return syncInternal(config, false);
+	}
+
+	private static CompletableFuture<Void> syncInternal(PlayerConfig config, boolean resyncing) {
 		return CompletableFuture.runAsync(() -> {
 			var token = getAuthToken();
 			var url = URI.create(getCloudServer() + "/" + config.uuid);
@@ -222,7 +226,12 @@ public final class CloudSync {
 					.header("Auth-Token", token)
 					.build();
 			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
-			if(response.statusCode() >= 400) {
+			if(response.statusCode() == 401 && !resyncing) {
+				WildfireGender.LOGGER.warn("Auth token is invalid, attempting to reauth...");
+				auth = null;
+				syncInternal(config, true).join();
+				return;
+			} else if(response.statusCode() >= 400) {
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 			WildfireGender.LOGGER.debug("Server responded to update: {}", response.body());
