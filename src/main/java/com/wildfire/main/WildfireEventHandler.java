@@ -174,7 +174,7 @@ public final class WildfireEventHandler {
 		}
 
 		if(CONFIG_KEYBIND.wasPressed() && client.currentScreen == null) {
-			if(GlobalConfig.INSTANCE.get(GlobalConfig.FIRST_TIME_LOAD)) {
+			if(GlobalConfig.INSTANCE.get(GlobalConfig.FIRST_TIME_LOAD) && CloudSync.isAvailable()) {
 				client.setScreen(new WildfireFirstTimeSetupScreen(null, client.player.getUuid()));
 			} else {
 				client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
