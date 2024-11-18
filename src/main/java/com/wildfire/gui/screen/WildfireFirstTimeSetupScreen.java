@@ -27,6 +27,7 @@ import com.wildfire.main.config.GlobalConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.FontManager;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -53,8 +54,16 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 
 	//TODO: PROPER TRANSLATIONS
 
+	private static final Text TITLE = Text.translatable("wildfire_gender.first_time_setup.title").formatted(Formatting.UNDERLINE);
+	private static final Text DESCRIPTION = Text.translatable("wildfire_gender.first_time_setup.description");
+	private static final Text NOTICE = Text.translatable("wildfire_gender.first_time_setup.notice");
+
 	private static final Text ENABLED = Text.translatable("wildfire_gender.label.enabled").formatted(Formatting.GREEN);
 	private static final Text DISABLED = Text.translatable("wildfire_gender.label.disabled").formatted(Formatting.RED);
+
+	private static final Text ENABLE_CLOUD_SYNCING = Text.translatable("wildfire_gender.first_time_setup.enable").formatted(Formatting.GREEN);
+	private static final Text DISABLE_CLOUD_SYNCING = Text.translatable("wildfire_gender.first_time_setup.disable").formatted(Formatting.RED);
+
 	private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/first_time_bg.png");
 
 	public WildfireFirstTimeSetupScreen(Screen parent, UUID uuid) {
@@ -70,28 +79,26 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 		int x = this.width / 2;
 		int y = this.height / 2;
 
-		this.addDrawableChild(new WildfireButton(x + 1, y + 75, 128 - 5 - 1, 20,
-				Text.of("Yes"),
+		this.addDrawableChild(new WildfireButton(x, y + 74, 128 - 5 - 1, 20,
+				ENABLE_CLOUD_SYNCING,
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					//Enable both settings, they can always disable automatic later? TBD
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, true);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, true);
 					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
-					config.save();
 
 					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
 				}));
 
 
-		this.addDrawableChild(new WildfireButton(x - 128 + 5, y + 75, 128 - 5 - 1, 20,
-				Text.of("No"),
+		this.addDrawableChild(new WildfireButton(x - 128 + 6, y + 74, 128 - 5 - 1, 20,
+				DISABLE_CLOUD_SYNCING,
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, false);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, false);
 					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
-					config.save();
 
 					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
 				}));
@@ -115,21 +122,16 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 		int x = this.width / 2;
 		int y = this.height / 2;
 
-		GuiUtils.drawCenteredText(ctx, textRenderer, Text.translatable("Welcome to Wildfire's Female Gender Mod!").formatted(Formatting.UNDERLINE), x, y - 20, 0x000000);
+		GuiUtils.drawCenteredText(ctx, textRenderer, TITLE, x, y - 20, 0x000000);
 
-		mStack.push();
-		mStack.translate(x, y - 5, 0);
-		mStack.scale(0.8f, 0.8f, 1);
-		mStack.translate(-x, -y + 5, 0);
-		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, Text.translatable("Would you like to enable cloud server syncing for your gender settings? This feature allows other players to view your customized gender appearance, even if the server doesn't have the mod installed."), x, y - 5, (int) ((256-10) * 1.2f), 4210752);
-		mStack.pop();
+		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, DESCRIPTION, x, y - 5, (int) ((256-10)), 4210752);
 
 
 		mStack.push();
 			mStack.translate(x, y + 47, 0);
-			mStack.scale(0.6f, 0.6f, 1);
+			mStack.scale(0.8f, 0.8f, 1);
 			mStack.translate(-x, -y - 47, 0);
-		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, Text.translatable("You can always change this setting later in the mod menu."), x, y + 77, (int) ((256-10) * 1.2f), 4210752);
+		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, NOTICE, x, y + 65, (int) ((256-10) * 1.2f), 4210752);
 		mStack.pop();
 
 
