@@ -49,6 +49,8 @@
 	"wildfire_gender.label.yes": "Yes",
 	"wildfire_gender.label.no": "No",
 	"wildfire_gender.label.with_creator": "You are playing on a server with the creator of this mod!",
+	"wildfire_gender.label.with_contributor": "You are playing on a server with a contributor of this mod!",
+	"wildfire_gender.label.with_both": "You are playing on a server with the creator and a contributor of this mod!",
 
 	"wildfire_gender.slider.bounce": "Bounce Intensity: %s%%",
 	"wildfire_gender.slider.floppy": "Breast Momentum: %s%%",
@@ -67,6 +69,7 @@
 
 
 	"wildfire_gender.cloud_settings": "Cloud Sync Settings",
+	"wildfire_gender.cloud.available_online": "Cloud Sync",
 	"wildfire_gender.cloud.unavailable_offline": "Cloud syncing is unavailable as you aren't currently logged into a valid Minecraft account",
 	"wildfire_gender.cloud.status": "Syncing:",
 	"wildfire_gender.cloud.automatic": "Automatic Sync:",
