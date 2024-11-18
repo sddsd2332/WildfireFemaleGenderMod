@@ -18,6 +18,8 @@
 
 package com.wildfire.main.cloud;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.RateLimiter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -58,9 +60,6 @@ public final class CloudSync {
 		throw new UnsupportedOperationException();
 	}
 
-	@SuppressWarnings("UnstableApiUsage")
-	private static final RateLimiter RATE_LIMITER = RateLimiter.create(5);
-
 	private static Instant lastSync = Instant.EPOCH;
 	private static final List<Instant> fetchErrors = new ArrayList<>();
 	private static @Nullable Instant disableFetchingUntil;
@@ -81,11 +80,19 @@ public final class CloudSync {
 			"WildfireGender/" + StringUtils.split(WildfireHelper.getModVersion(WildfireGender.MODID), '+')[0]
 					+ " Minecraft/" + WildfireHelper.getModVersion("minecraft");
 
+	@SuppressWarnings("UnstableApiUsage")
+	private static final RateLimiter RATE_LIMITER = RateLimiter.create(5);
+	private static final Cache<UUID, Optional<JsonObject>> FETCH_CACHE = CacheBuilder.newBuilder()
+			.expireAfterAccess(Duration.ofMinutes(5))
+			.maximumSize(256)
+			.concurrencyLevel(6) // rate limit + 1
+			.build();
+
 	private static final String DEFAULT_CLOUD_URL = "https://wfgm.celestialfault.dev";
-	public static final Duration SYNC_COOLDOWN = Duration.of(10, ChronoUnit.SECONDS);
+	private static final Duration SYNC_COOLDOWN = Duration.ofSeconds(10);
 	// Assume that authentication tokens have already expired if they're due to expire within 30 seconds to account
 	// for potential clock drift and network latency
-	public static final Duration AUTH_INVALIDATION_ADJUSTMENT = Duration.of(30, ChronoUnit.SECONDS);
+	private static final Duration AUTH_INVALIDATION_ADJUSTMENT = Duration.ofSeconds(30);
 
 	private static boolean useHttp1_1() {
 		// FIXME this is a terrible workaround to a really dumb issue.
@@ -97,7 +104,7 @@ public final class CloudSync {
 	}
 
 	/**
-	 * @return {@code true} if the last sync was within the last {@link #SYNC_COOLDOWN 10 seconds}
+	 * @return {@code true} if the last {@link #sync(PlayerConfig) sync} was within the last 10 seconds
 	 */
 	public static boolean syncOnCooldown() {
 		return lastSync.plus(SYNC_COOLDOWN).isAfter(Instant.now());
@@ -180,9 +187,8 @@ public final class CloudSync {
 				auth = GSON.fromJson(response.body(), CloudAuth.class);
 				if(client.player != null && !auth.account().equals(client.player.getUuid())) {
 					WildfireGender.LOGGER.warn("Authenticated account {} does not match the current player ({}); you likely have a misbehaving account switcher mod installed!", auth.account(), client.player.getUuid());
-				} else {
-					WildfireGender.LOGGER.info("Obtained authentication token for {}, expiry {}", auth.account, auth.expires);
 				}
+				WildfireGender.LOGGER.info("Obtained authentication token for {}, expiry {}", auth.account, auth.expires);
 			}
 		}
 		return auth.token();
@@ -255,6 +261,11 @@ public final class CloudSync {
 			// such uuids with a 422 response, so don't bother trying to fetch them.
 			return CompletableFuture.completedFuture(null);
 		}
+		var cached = FETCH_CACHE.getIfPresent(uuid);
+		//noinspection OptionalAssignedToNull
+		if(cached != null) {
+			return CompletableFuture.completedFuture(cached.orElse(null));
+		}
 
 		return CompletableFuture.supplyAsync(() -> {
 			//noinspection UnstableApiUsage
@@ -268,13 +279,16 @@ public final class CloudSync {
 			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
 			if(response.statusCode() == 404) {
 				WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
+				FETCH_CACHE.put(uuid, Optional.empty());
 				return null;
 			} else if(response.statusCode() >= 400) {
 				markFetchError();
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 
-			return GSON.fromJson(response.body(), JsonObject.class);
+			var data = GSON.fromJson(response.body(), JsonObject.class);
+			FETCH_CACHE.put(uuid, Optional.of(data));
+			return data;
 		}, EXECUTOR);
 	}
 
