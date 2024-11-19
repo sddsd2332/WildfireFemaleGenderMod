@@ -132,7 +132,7 @@ public final class CloudSync {
 	private static void markFetchError() {
 		fetchErrors.add(Instant.now());
 		fetchErrors.removeIf(e -> e.plus(30, ChronoUnit.SECONDS).isBefore(Instant.now()));
-		if(fetchErrors.size() >= 10) {
+		if(fetchErrors.size() >= 5) {
 			WildfireGender.LOGGER.error("Too many recent sync errors, disabling future lookups for 5 minutes");
 			disableFetchingUntil = Instant.now().plus(5, ChronoUnit.MINUTES);
 		}
@@ -293,7 +293,7 @@ public final class CloudSync {
 	/**
 	 * Fetch data for multiple players from the sync server.
 	 *
-	 * @param uuids A collection of between 1 and 20 UUIDs to fetch player data for
+	 * @param uuids A collection of between 2 and 20 UUIDs to fetch player data for
 	 *
 	 * @return A {@link CompletableFuture} containing a map of player UUIDs to their synced data; any provided
 	 *         player UUIDs without any sync data will not be included in the returned map.
@@ -317,6 +317,7 @@ public final class CloudSync {
 					.build();
 			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
 			if(response.statusCode() >= 400) {
+				markFetchError();
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 
