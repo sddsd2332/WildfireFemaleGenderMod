@@ -339,6 +339,10 @@ public final class CloudSync {
 	 *         which will be completed once the next queued batch is finished.
 	 */
 	public static CompletableFuture<@Nullable JsonObject> queueFetch(UUID uuid) {
+		if(!isEnabled()) {
+			return CompletableFuture.completedFuture(null);
+		}
+
 		var cached = FETCH_CACHE.getIfPresent(uuid);
 		//noinspection OptionalAssignedToNull
 		if(cached != null) {
