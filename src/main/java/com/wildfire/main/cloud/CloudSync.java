@@ -54,6 +54,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * <p>Utility class for managing syncing player data to/from the cloud, even if the current connected server doesn't
+ * have the mod installed.</p>
+ */
 @Environment(EnvType.CLIENT)
 public final class CloudSync {
 	private CloudSync() {
@@ -157,7 +161,10 @@ public final class CloudSync {
 	private static String getAuthToken() {
 		synchronized(AUTH_LOCK) {
 			var client = MinecraftClient.getInstance();
-			if(auth == null || auth.isExpired() || (client.player != null && !auth.account().equals(client.player.getUuid()))) {
+			if(client.player == null) {
+				throw new IllegalStateException("Cannot get a new auth token while the client player is unset");
+			}
+			if(auth == null || auth.isExpired() || auth.isInvalidForClientPlayer()) {
 				WildfireGender.LOGGER.info("Obtaining new authentication token from the cloud sync server");
 
 				var serverId = generateServerId();
@@ -178,7 +185,7 @@ public final class CloudSync {
 				}
 
 				auth = GSON.fromJson(response.body(), CloudAuth.class);
-				if(client.player != null && !auth.account().equals(client.player.getUuid())) {
+				if(auth.isInvalidForClientPlayer()) {
 					WildfireGender.LOGGER.warn("Authenticated account {} does not match the current player ({}); you likely have a misbehaving account switcher mod installed!", auth.account(), client.player.getUuid());
 				}
 				WildfireGender.LOGGER.info("Obtained authentication token for {}, expiry {}", auth.account(), auth.expires());
@@ -244,6 +251,10 @@ public final class CloudSync {
 	 *
 	 * @return A {@link CompletableFuture} containing a {@link JsonObject} of the player's data if they have any data
 	 * 		   stored in the sync server, or {@code null} otherwise.
+	 *
+	 * @apiNote The provided UUID <b>must</b> be {@link UUID#version() version 4}, otherwise the request will fail.
+	 *
+	 * @see #queueFetch(UUID)
 	 */
 	public static CompletableFuture<@Nullable JsonObject> getProfile(UUID uuid) {
 		if(isFetchingDisabled()) {
@@ -280,12 +291,16 @@ public final class CloudSync {
 	}
 
 	/**
-	 * Fetch data for multiple players from the sync server
+	 * Fetch data for multiple players from the sync server.
 	 *
 	 * @param uuids A collection of between 1 and 20 UUIDs to fetch player data for
 	 *
 	 * @return A {@link CompletableFuture} containing a map of player UUIDs to their synced data; any provided
 	 *         player UUIDs without any sync data will not be included in the returned map.
+	 *
+	 * @apiNote All UUIDs <b>must</b> be {@link UUID#version() version 4}, otherwise the request will fail.
+	 *
+	 * @see #queueFetch(UUID)
 	 */
 	public static CompletableFuture<Map<UUID, JsonObject>> getMultiple(Collection<UUID> uuids) {
 		return CompletableFuture.supplyAsync(() -> {
@@ -312,8 +327,10 @@ public final class CloudSync {
 	}
 
 	/**
-	 * Add a UUID to the fetch queue; this may be requested individually or in bulk, depending on how many other
-	 * users are queued to be fetched.
+	 * <p>Add a UUID to the fetch queue; this may be requested individually or in bulk, depending on how many other
+	 * users are queued to be fetched.</p>
+	 *
+	 * <p>Queued queries are currently sent once every 2 seconds (or every 40th tick) in batches of up to 20 at once.</p>
 	 *
 	 * @param uuid The UUID of the user to fetch
 	 *
@@ -326,12 +343,22 @@ public final class CloudSync {
 		if(cached != null) {
 			return CompletableFuture.completedFuture(cached.orElse(null));
 		}
+		if(uuid.version() != 4) {
+			// some servers (namely hypixel) use non-v4 uuids for their npcs; the sync server will immediately reject
+			// such uuids with a 422 response, so don't bother trying to fetch them.
+			return CompletableFuture.completedFuture(null);
+		}
 
 		var future = new CompletableFuture<@Nullable JsonObject>();
 		QUEUED.add(new QueuedFetch(uuid, future));
 		return future;
 	}
 
+	/**
+	 * Sends up to 20 {@link #queueFetch(UUID) queued sync queries}
+	 *
+	 * @apiNote This method is not intended to be used by other mods.
+	 */
 	@ApiStatus.Internal
 	public static void sendNextQueueBatch() {
 		if(QUEUED.isEmpty()) {
