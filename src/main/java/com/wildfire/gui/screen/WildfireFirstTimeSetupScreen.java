@@ -87,6 +87,9 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, true);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, true);
 					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
+					config.save();
+
+					// TODO fetch user data if they don't have anything saved locally / sync existing data?
 
 					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
 				}));
@@ -99,6 +102,7 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, false);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, false);
 					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
+					config.save();
 
 					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
 				}));
@@ -139,7 +143,6 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 
 	@Override
 	public void close() {
-		GlobalConfig.INSTANCE.save();
 		super.close();
 	}
 }
