@@ -27,7 +27,6 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.HttpAuthenticationService;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.util.InstantTypeAdapter;
-import com.wildfire.gui.screen.WildfireCloudSyncScreen;
 import com.wildfire.main.WildfireLocalization;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.WildfireHelper;
@@ -164,12 +163,12 @@ public final class CloudSync {
 		synchronized(AUTH_LOCK) {
 			var client = MinecraftClient.getInstance();
 			if(client.player == null) {
-				WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_AUTHENTICATION_FAILED);
+				SyncLog.add(WildfireLocalization.SYNC_LOG_AUTHENTICATION_FAILED);
 				throw new IllegalStateException("Cannot get a new auth token while the client player is unset");
 			}
 			if(auth == null || auth.isExpired() || auth.isInvalidForClientPlayer()) {
 				WildfireGender.LOGGER.info("Obtaining new authentication token from the cloud sync server");
-				WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_AUTHENTICATING);
+				SyncLog.add(WildfireLocalization.SYNC_LOG_AUTHENTICATING);
 
 				var serverId = generateServerId();
 				var session = client.getSession();
@@ -185,7 +184,7 @@ public final class CloudSync {
 				var request = createRequest(uri).GET().build();
 				var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
 				if(response.statusCode() >= 400) {
-					WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_AUTHENTICATION_FAILED);
+					SyncLog.add(WildfireLocalization.SYNC_LOG_AUTHENTICATION_FAILED);
 					throw new RuntimeException("Failed to authenticate with sync server: " + response.body());
 				}
 
@@ -195,7 +194,7 @@ public final class CloudSync {
 				}
 				WildfireGender.LOGGER.info("Obtained authentication token for {}, expiry {}", auth.account(), auth.expires());
 				if(!auth.isInvalidForClientPlayer()) { //TODO: This might not need to be here.
-					WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_AUTHENTICATION_SUCCESS);
+					SyncLog.add(WildfireLocalization.SYNC_LOG_AUTHENTICATION_SUCCESS);
 				}
 			}
 		}
@@ -234,7 +233,7 @@ public final class CloudSync {
 			var url = URI.create(getCloudServer() + "/" + config.uuid);
 			var json = config.toJson().toString();
 
-			WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_ATTMEPTING_SYNC);
+			SyncLog.add(WildfireLocalization.SYNC_LOG_ATTMEPTING_SYNC);
 
 			var request = createRequest(url)
 					.PUT(HttpRequest.BodyPublishers.ofString(json))
@@ -243,7 +242,7 @@ public final class CloudSync {
 					.build();
 			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
 			if(response.statusCode() == 401 && !resyncing) {
-				WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_REAUTHENTICATING);
+				SyncLog.add(WildfireLocalization.SYNC_LOG_REAUTHENTICATING);
 				WildfireGender.LOGGER.warn("Auth token is invalid, attempting to reauth...");
 				auth = null;
 				syncInternal(config, true).join();
@@ -252,7 +251,7 @@ public final class CloudSync {
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 			WildfireGender.LOGGER.debug("Server responded to update: {}", response.body());
-			WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_SYNC_SUCCESS);
+			SyncLog.add(WildfireLocalization.SYNC_LOG_SYNC_SUCCESS);
 		}, EXECUTOR);
 	}
 

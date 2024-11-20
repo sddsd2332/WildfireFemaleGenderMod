@@ -23,6 +23,7 @@ import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.WildfireLocalization;
 import com.wildfire.main.cloud.CloudSync;
+import com.wildfire.main.cloud.SyncLog;
 import com.wildfire.main.cloud.SyncingTooFrequentlyException;
 import com.wildfire.main.config.GlobalConfig;
 import net.fabricmc.api.EnvType;
@@ -34,8 +35,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -43,9 +42,6 @@ import java.util.concurrent.CompletionException;
 
 @Environment(EnvType.CLIENT)
 public class WildfireCloudSyncScreen extends BaseWildfireScreen {
-
-	//There should only ever be one instance of this file, so I'm putting this list here. Inform if should be moved.
-	private static final List<Text> STATUS_LOG = new ArrayList<>();
 
 	private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/sync_bg_v2.png");
 
@@ -90,7 +86,6 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 		btnAutomaticSync.setActive(CloudSync.isEnabled());
 
 		btnSyncNow = new WildfireButton(xPos + 98, yPos + 42, 60, 15, Text.translatable("wildfire_gender.cloud.sync"), this::sync);
-		//btnSyncNow.setActive(GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED));
 		btnSyncNow.visible = GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
 		this.addDrawableChild(btnSyncNow);
 
@@ -111,7 +106,7 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 				var actualException = e instanceof CompletionException ce ? ce.getCause() : e;
 				if(actualException instanceof SyncingTooFrequentlyException) {
 					WildfireGender.LOGGER.warn("Failed to sync settings as we've already synced too recently");
-					WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_SYNC_TOO_FREQUENTLY);
+					SyncLog.add(WildfireLocalization.SYNC_LOG_SYNC_TOO_FREQUENTLY);
 				} else {
 					WildfireGender.LOGGER.error("Failed to sync settings", actualException);
 				}
@@ -133,16 +128,21 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 
 		int x = this.width / 2;
 		int y = this.height / 2;
-		int yPos = y - 47;
+		y -= 47;
 
-		ctx.drawText(textRenderer, getTitle(), x - 79, yPos - 10, 4473924, false);
-		ctx.drawText(textRenderer, Text.translatable("wildfire_gender.cloud.status_log"), x - 79, yPos + 49, 4473924, false);
+		GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, getTitle(),
+				x - 79, y - 12, x - 79 + 150, y - 11 + 10, 4473924);
+		GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, Text.translatable("wildfire_gender.cloud.status_log"),
+				x - 79, y + 47, x - 79 + 95, y + 48 + 10, 4473924);
 
-		for(int i = STATUS_LOG.size()-1; i >= 0; i--) {
-			int reverseIndex = STATUS_LOG.size() - 1 - i;
+		for(int i = SyncLog.SYNC_LOG.size() - 1; i >= 0; i--) {
+			int reverseIndex = SyncLog.SYNC_LOG.size() - 1 - i;
+			var entry = SyncLog.SYNC_LOG.get(i);
 
-			if (reverseIndex < 6) {
-				GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, STATUS_LOG.get(i), x - 78, yPos + 111 - (reverseIndex * 10), (x - 78) + 156, (yPos + 111 - (reverseIndex * 10)) + 10, 0x00FF00);
+			if(reverseIndex < 6) {
+				int ey = y + 110 - (reverseIndex * 10);
+				GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, entry.text(),
+						x - 78, ey, x - 78 + 156, ey + 10, entry.color());
 			}
 		}
 	}
@@ -151,12 +151,5 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 	public void close() {
 		GlobalConfig.INSTANCE.save();
 		super.close();
-	}
-
-	public static void log(Text text) {
-		STATUS_LOG.add(text);
-		if(STATUS_LOG.size() > 6) {
-			STATUS_LOG.removeFirst(); //remove first entry since it's never seen again
-		}
 	}
 }
