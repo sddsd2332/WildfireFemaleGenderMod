@@ -21,29 +21,19 @@ package com.wildfire.gui.screen;
 import com.wildfire.gui.GuiUtils;
 import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.WildfireGender;
-import com.wildfire.main.cloud.CloudSync;
-import com.wildfire.main.cloud.SyncingTooFrequentlyException;
+import com.wildfire.main.WildfireGenderClient;
 import com.wildfire.main.config.GlobalConfig;
+import com.wildfire.main.entitydata.PlayerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.FontManager;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CraftingScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -58,9 +48,6 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 	private static final Text DESCRIPTION = Text.translatable("wildfire_gender.first_time_setup.description");
 	private static final Text NOTICE = Text.translatable("wildfire_gender.first_time_setup.notice");
 
-	private static final Text ENABLED = Text.translatable("wildfire_gender.label.enabled").formatted(Formatting.GREEN);
-	private static final Text DISABLED = Text.translatable("wildfire_gender.label.disabled").formatted(Formatting.RED);
-
 	private static final Text ENABLE_CLOUD_SYNCING = Text.translatable("wildfire_gender.first_time_setup.enable").formatted(Formatting.GREEN);
 	private static final Text DISABLE_CLOUD_SYNCING = Text.translatable("wildfire_gender.first_time_setup.disable").formatted(Formatting.RED);
 
@@ -72,12 +59,13 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 
 	@Override
 	public void init() {
-
-		//var config = GlobalConfig.INSTANCE;
-		//					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, !config.get(GlobalConfig.CLOUD_SYNC_ENABLED));
-
 		int x = this.width / 2;
 		int y = this.height / 2;
+
+		// why must Java be?
+		final var ref = new Object() {
+			WildfireButton no = null;
+		};
 
 		this.addDrawableChild(new WildfireButton(x, y + 74, 128 - 5 - 1, 20,
 				ENABLE_CLOUD_SYNCING,
@@ -87,27 +75,54 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, true);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, true);
 					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
-					config.save();
 
-					// TODO fetch user data if they don't have anything saved locally / sync existing data?
+					button.active = false;
+					button.setMessage(Text.literal("..."));
+					ref.no.setActive(false);
 
-					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
+					final var nextScreen = new WardrobeBrowserScreen(null, client.player.getUuid());
+					doInitialSync().thenRun(() -> client.execute(() -> client.setScreen(nextScreen)));
 				}));
 
 
-		this.addDrawableChild(new WildfireButton(x - 128 + 6, y + 74, 128 - 5 - 1, 20,
+		this.addDrawableChild(ref.no = new WildfireButton(x - 128 + 6, y + 74, 128 - 5 - 1, 20,
 				DISABLE_CLOUD_SYNCING,
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, false);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, false);
 					config.set(GlobalConfig.FIRST_TIME_LOAD, false);
-					config.save();
 
 					client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
 				}));
 
 		super.init();
+	}
+
+	private CompletableFuture<Void> doInitialSync() {
+		var client = Objects.requireNonNull(this.client);
+		var clientUUID = client.player.getUuid();
+		return CompletableFuture.runAsync(() -> {
+			var clientConfig = WildfireGender.getOrAddPlayerById(clientUUID);
+			// if the player has a local config, assume that needsCloudSync is already set to true, and as such
+			// their config will be synced on the next attempt
+			if(!clientConfig.hasLocalConfig()) {
+				try {
+					// note that we wait for this to ensure that we don't have any inconsistencies with the synced
+					// data once we open the main menu
+					WildfireGenderClient.loadGenderInfo(clientUUID, false, true).join();
+				} catch(CompletionException ignored) {
+					// loadGenderInfo should log any errors for us
+					return;
+				} catch(Exception e) {
+					WildfireGender.LOGGER.error("Failed to perform initial sync from the cloud", e);
+					return;
+				}
+				PlayerConfig.saveGenderInfo(clientConfig);
+				// don't immediately re-sync the data we just got back to the cloud
+				clientConfig.needsCloudSync = false;
+			}
+		});
 	}
 
 	@Override
@@ -144,5 +159,10 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 	@Override
 	public void close() {
 		super.close();
+	}
+
+	@Override
+	public void removed() {
+		GlobalConfig.INSTANCE.save();
 	}
 }

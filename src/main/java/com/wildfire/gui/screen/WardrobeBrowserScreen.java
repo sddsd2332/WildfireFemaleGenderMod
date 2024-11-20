@@ -161,21 +161,15 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 				GuiUtils.drawCenteredText(ctx, this.textRenderer, Text.translatable("wildfire_gender.label.with_contributor"), this.width / 2, creatorY, 0xFF00FF);
 			}
 
-
-
-
-			List<PlayerListEntry> playerListEntry = collectPlayerEntries();
-
-			if(!playerListEntry.isEmpty()) {
-				ctx.drawText(textRenderer, Text.literal("Players Using the Mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
-			}
-
-
-			int yPos = 18;
-			for(PlayerListEntry entry : playerListEntry) {
-				PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
-				ctx.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
-				yPos += 10;
+			List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
+			if(!syncedPlayers.isEmpty()) {
+				ctx.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
+				int yPos = 18;
+				for(PlayerListEntry entry : syncedPlayers) {
+					PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
+					ctx.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
+					yPos += 10;
+				}
 			}
 		}
 

@@ -96,7 +96,7 @@ public class WildfireAPI {
      */
     @Environment(EnvType.CLIENT)
     public static CompletableFuture<@NotNull PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync) {
-        return WildfireGenderClient.loadGenderInfo(uuid, markForSync);
+        return WildfireGenderClient.loadGenderInfo(uuid, markForSync, false);
     }
 
     /**

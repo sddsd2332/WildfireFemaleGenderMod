@@ -47,7 +47,7 @@ public class WildfireGenderClient implements ClientModInitializer {
 		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(GenderArmorResourceManager.INSTANCE);
 	}
 
-	public static CompletableFuture<@NotNull PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync) {
+	public static CompletableFuture<@NotNull PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync, boolean bypassQueue) {
 		return CompletableFuture.supplyAsync(() -> {
 			var player = WildfireGender.getOrAddPlayerById(uuid);
 			if(player.hasLocalConfig()) {
@@ -55,7 +55,8 @@ public class WildfireGenderClient implements ClientModInitializer {
 			} else if(player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
 				JsonObject data;
 				try {
-					data = CloudSync.queueFetch(uuid).join();
+					var future = bypassQueue ? CloudSync.getProfile(uuid) : CloudSync.queueFetch(uuid);
+					data = future.join();
 				} catch(Exception e) {
 					WildfireGender.LOGGER.error("Failed to fetch profile from sync server", e);
 					throw e;
@@ -73,6 +74,6 @@ public class WildfireGenderClient implements ClientModInitializer {
 	public static void loadPlayerIfMissing(UUID uuid, boolean markForSync) {
 		if(WildfireGender.PLAYER_CACHE.containsKey(uuid)) return;
 		WildfireGender.getOrAddPlayerById(uuid);
-		loadGenderInfo(uuid, markForSync);
+		loadGenderInfo(uuid, markForSync, false);
 	}
 }
