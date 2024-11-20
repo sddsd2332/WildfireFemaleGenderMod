@@ -74,5 +74,17 @@
 	"wildfire_gender.cloud.automatic.tooltip.line2": "Je kan nog steeds manueel synchroniseren met de knop hier onder, als dit uitstaat.",
 	"wildfire_gender.cloud.syncing": "Synchroniseren...",
 	"wildfire_gender.cloud.syncing.success": "Gesynchroniseerd",
-	"wildfire_gender.cloud.syncing.fail": "Synchronisatie Niet Gelukt"
+	"wildfire_gender.cloud.syncing.fail": "Synchronisatie Niet Gelukt",
+	"wildfire_gender.wardrobe.players_using_mod": "Spelers die de mod gebruiken:",
+	"wildfire_gender.label.off": "Uit",
+	"wildfire_gender.cloud.status_log": "Status Log",
+	"wildfire_gender.sync_log.authenticating": "Account Verifiëren...",
+	"wildfire_gender.sync_log.authentication_success": "Verificatie Gelukt.",
+	"wildfire_gender.sync_log.authentication_failed": "Verificatie Gefaald.",
+	"wildfire_gender.sync_log.reauthenticating": "Account Opnieuw Verifiëren...",
+	"wildfire_gender.sync_log.failed_to_sync_data": "Gefaald om Data te Sychroniseren.",
+	"wildfire_gender.sync_log.sync_to_cloud": "Data Online Sychroniseren...",
+	"wildfire_gender.sync_log.attempting_sync": "Profiel Sychroniseren...",
+	"wildfire_gender.sync_log.sync_success": "Sychronisatie Gelukt.",
+	"wildfire_gender.sync_log.sync_too_frequently": "Sychronisatie Tarief is Beperkt."
 }
