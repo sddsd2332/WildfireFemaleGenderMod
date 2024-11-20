@@ -56,12 +56,9 @@
 
 	"wildfire_gender.slider.bounce": "Bounce Intensity: %s%%",
 	"wildfire_gender.slider.floppy": "Breast Momentum: %s%%",
-	"wildfire_gender.slider.min_bounce": "Why Are Physics Even On?",
-	"wildfire_gender.slider.max_bounce": "Anime Breast Physics!!!",
 	"wildfire_gender.tooltip.bounce_warning": "Setting 'Bounce Intensity' to a high value will look very unnatural!",
 
 	"wildfire_gender.cancer_awareness.title": "Hey, it's Breast Cancer Awareness Month!",
-	"wildfire_gender.coming_soon": "Coming soon",
 
 	"wildfire_gender.first_time_setup.title": "Welcome to Wildfire's Female Gender Mod!",
 	"wildfire_gender.first_time_setup.description": "Would you like to enable cloud server syncing for your gender settings? This feature allows other players to view your customized gender appearance, even if the server doesn't have the mod installed.",
@@ -83,7 +80,7 @@
 	"wildfire_gender.cloud.status_log": "Status Log",
 
 	"wildfire_gender.cloud.syncing.success": "Synced",
-	"wildfire_gender.cloud.syncing.fail": "Sync failed",
+	"wildfire_gender.cloud.syncing.fail": "Sync Failed",
 
 	"wildfire_gender.sync_log.authenticating": "Authenticating Account...",
 	"wildfire_gender.sync_log.authentication_success": "Authentication Successful.",
