@@ -54,12 +54,9 @@
 
 	"wildfire_gender.slider.bounce": "Veerkracht Intensiteit: %s%%",
 	"wildfire_gender.slider.floppy": "Borst Momentum: %s%%",
-	"wildfire_gender.slider.min_bounce": "Waarom Staan De Bewegingen Aan?",
-	"wildfire_gender.slider.max_bounce": "Anime Borst Bewegingen!!!",
 	"wildfire_gender.tooltip.bounce_warning": "Instelling 'Veerkracht Intensiteit' op een hoog nummer ziet er erg niet natuurlijk uit!",
 
 	"wildfire_gender.cancer_awareness.title": "Hé, het is Borst Kanker Aandacht Maand",
-	"wildfire_gender.coming_soon": "Komt Binnenkort",
 
 	"wildfire_gender.first_time_setup.title": "Welkom bij Wildfire's Vrouwelijke Geslachts Mod!",
 	"wildfire_gender.first_time_setup.description": "Wil je de optie aanzetten om je geslachts instellingen online te Synchroniseren? Hier mee kunnen anderen jouw aangepaste geslacht uiterlijk, zelfs al heeft de server deze mod niet geïnstalleerd.",
@@ -70,12 +67,24 @@
 	"wildfire_gender.cloud_settings": "Online Synchronisatie Instellingen",
 	"wildfire_gender.cloud.available_online": "Online Synchronisatie",
 	"wildfire_gender.cloud.unavailable_offline": "Online synchronisatie is niet beschikbaar, omdat je niet bent ingelogd in een geldig Minecraft account",
-	"wildfire_gender.cloud.status": "Synchroniseren:",
-	"wildfire_gender.cloud.automatic": "Automatische Synchronisatie:",
+	"wildfire_gender.cloud.status": "Synchroniseren: %s",
+	"wildfire_gender.cloud.automatic": "Automatische Synchronisatie: %s",
 	"wildfire_gender.cloud.automatic.tooltip.line1": "Wanner dit aanstaat, jouw configuratie wordt automatisch online gesynchroniseerd na dat je aanpassingen maakt.",
 	"wildfire_gender.cloud.sync": "Synchroniseer",
 	"wildfire_gender.cloud.automatic.tooltip.line2": "Je kan nog steeds manueel synchroniseren met de knop hier onder, als dit uitstaat.",
 	"wildfire_gender.cloud.syncing": "Synchroniseren...",
 	"wildfire_gender.cloud.syncing.success": "Gesynchroniseerd",
-	"wildfire_gender.cloud.syncing.fail": "Synchronisatie Niet Gelukt"
+	"wildfire_gender.cloud.syncing.fail": "Synchronisatie Niet Gelukt",
+	"wildfire_gender.wardrobe.players_using_mod": "Spelers die de mod gebruiken:",
+	"wildfire_gender.label.off": "Uit",
+	"wildfire_gender.cloud.status_log": "Status Log",
+	"wildfire_gender.sync_log.authenticating": "Account Verifiëren...",
+	"wildfire_gender.sync_log.authentication_success": "Verificatie Gelukt.",
+	"wildfire_gender.sync_log.authentication_failed": "Verificatie Gefaald.",
+	"wildfire_gender.sync_log.reauthenticating": "Account Opnieuw Verifiëren...",
+	"wildfire_gender.sync_log.failed_to_sync_data": "Gefaald om Data te Sychroniseren.",
+	"wildfire_gender.sync_log.sync_to_cloud": "Data Online Sychroniseren...",
+	"wildfire_gender.sync_log.attempting_sync": "Profiel Sychroniseren...",
+	"wildfire_gender.sync_log.sync_success": "Sychronisatie Gelukt.",
+	"wildfire_gender.sync_log.sync_too_frequently": "Sychronisatie Tarief is Beperkt."
 }
