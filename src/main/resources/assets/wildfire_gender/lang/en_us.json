@@ -47,6 +47,7 @@
 
 	"wildfire_gender.label.enabled": "Enabled",
 	"wildfire_gender.label.disabled": "Disabled",
+	"wildfire_gender.label.off": "Off",
 	"wildfire_gender.label.yes": "Yes",
 	"wildfire_gender.label.no": "No",
 	"wildfire_gender.label.with_creator": "You are playing on a server with the creator of this mod!",
@@ -69,15 +70,26 @@
 	"wildfire_gender.first_time_setup.disable": "Disable Cloud Syncing",
 
 
-	"wildfire_gender.cloud_settings": "Cloud Sync Settings",
+	"wildfire_gender.cloud_settings": "Cloud Sync Server Settings",
 	"wildfire_gender.cloud.available_online": "Cloud Sync",
 	"wildfire_gender.cloud.unavailable_offline": "Cloud syncing is unavailable as you aren't currently logged into a valid Minecraft account",
-	"wildfire_gender.cloud.status": "Syncing:",
-	"wildfire_gender.cloud.automatic": "Automatic Sync:",
+	"wildfire_gender.cloud.status": "Cloud Sync: %s",
+	"wildfire_gender.cloud.automatic": "Automatic Sync: %s",
 	"wildfire_gender.cloud.automatic.tooltip.line1": "While enabled, your config will automatically be synced to the cloud after making any changes.",
 	"wildfire_gender.cloud.automatic.tooltip.line2": "You can still sync manually with the button below if this is disabled.",
-	"wildfire_gender.cloud.sync": "Sync",
+	"wildfire_gender.cloud.sync": "Sync Now",
 	"wildfire_gender.cloud.syncing": "Syncing...",
+
+	"wildfire_gender.cloud.status_log": "Status Log",
+
 	"wildfire_gender.cloud.syncing.success": "Synced",
-	"wildfire_gender.cloud.syncing.fail": "Sync failed"
+	"wildfire_gender.cloud.syncing.fail": "Sync failed",
+
+	"wildfire_gender.sync_log.authenticating": "Authenticating Account...",
+	"wildfire_gender.sync_log.authentication_success": "Authentication Successful.",
+	"wildfire_gender.sync_log.authentication_failed": "Failed Authentication.",
+	"wildfire_gender.sync_log.reauthenticating": "Re-Authenticating Account...",
+	"wildfire_gender.sync_log.attempting_sync": "Syncing Profile...",
+	"wildfire_gender.sync_log.sync_success": "Sync Successful.",
+	"wildfire_gender.sync_log.sync_too_frequently": "Sync Rate Limited."
 }

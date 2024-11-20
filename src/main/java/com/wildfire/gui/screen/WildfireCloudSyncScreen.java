@@ -35,6 +35,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -43,9 +46,13 @@ import java.util.concurrent.CompletionException;
 @Environment(EnvType.CLIENT)
 public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 
-	private static final Text ENABLED = Text.translatable("wildfire_gender.label.enabled").formatted(Formatting.GREEN);
-	private static final Text DISABLED = Text.translatable("wildfire_gender.label.disabled").formatted(Formatting.RED);
-	private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/sync_bg.png");
+	//There should only ever be one instance of this file, so I'm putting this list here. Inform if should be moved.
+	private static final List<Text> STATUS_LOG = new ArrayList<>();
+
+	private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/sync_bg_v2.png");
+
+	private WildfireButton btnAutomaticSync = null;
+	private WildfireButton btnSyncNow = null;
 
 	protected WildfireCloudSyncScreen(Screen parent, UUID uuid) {
 		super(Text.translatable("wildfire_gender.cloud_settings"), parent, uuid);
@@ -55,44 +62,49 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 	public void init() {
 		int x = this.width / 2;
 		int y = this.height / 2;
-		int yPos = y - 44;
-		int xPos = x + 60 / 2 - 1;
+		int yPos = y - 47;
+		int xPos = x - 156 / 2 - 1;
 
-		this.addDrawableChild(new WildfireButton(xPos - 15, yPos, 80, 20,
-				CloudSync.isEnabled() ? ENABLED : DISABLED,
+
+		this.addDrawableChild(new WildfireButton(xPos, yPos, 157, 20,
+				Text.translatable("wildfire_gender.cloud.status", CloudSync.isEnabled() ? WildfireLocalization.ENABLED : WildfireLocalization.DISABLED),
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					config.set(GlobalConfig.CLOUD_SYNC_ENABLED, !config.get(GlobalConfig.CLOUD_SYNC_ENABLED));
-					button.setMessage(CloudSync.isEnabled() ? ENABLED : DISABLED);
+					button.setMessage(Text.translatable("wildfire_gender.cloud.status", CloudSync.isEnabled() ? WildfireLocalization.ENABLED : WildfireLocalization.DISABLED));
+					btnAutomaticSync.setActive(CloudSync.isEnabled());
+					btnAutomaticSync.setMessage(Text.translatable("wildfire_gender.cloud.automatic", CloudSync.isEnabled() ? (GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) ? WildfireLocalization.ENABLED : WildfireLocalization.DISABLED) : WildfireLocalization.OFF));
+					btnSyncNow.visible = GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
 				},
 				text -> Text.empty()
 						.append(Text.translatable("wildfire_gender.cloud.status"))
 						.append(" ")
 						.append(text.get())));
 
-		WildfireButton automatic;
-		this.addDrawableChild(automatic = new WildfireButton(xPos - 15, yPos + 22, 80, 20,
-				GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) ? ENABLED : DISABLED,
+		this.addDrawableChild(btnAutomaticSync = new WildfireButton(xPos, yPos + 20, 157, 20,
+				Text.translatable("wildfire_gender.cloud.automatic", CloudSync.isEnabled() ? (GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) ? WildfireLocalization.ENABLED : WildfireLocalization.DISABLED) : WildfireLocalization.OFF),
 				button -> {
 					var config = GlobalConfig.INSTANCE;
 					var newVal = !config.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC);
 					config.set(GlobalConfig.AUTOMATIC_CLOUD_SYNC, newVal);
-					button.setMessage(newVal ? ENABLED : DISABLED);
+					button.setMessage(Text.translatable("wildfire_gender.cloud.automatic", newVal ? WildfireLocalization.ENABLED : WildfireLocalization.DISABLED));
 				},
 				text -> Text.empty()
 						.append(Text.translatable("wildfire_gender.cloud.automatic"))
 						.append(" ")
 						.append(text.get())));
-		automatic.setTooltip(Tooltip.of(Text.empty()
+		btnAutomaticSync.setTooltip(Tooltip.of(Text.empty()
 				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line1"))
 				.append("\n\n")
 				.append(Text.translatable("wildfire_gender.cloud.automatic.tooltip.line2"))));
+		btnAutomaticSync.setActive(CloudSync.isEnabled());
 
-		var syncButton = new WildfireButton(xPos - 80, yPos + 80, 100, 15, Text.translatable("wildfire_gender.cloud.sync"), this::sync);
-		syncButton.setActive(GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED));
-		this.addDrawableChild(syncButton);
+		btnSyncNow = new WildfireButton(xPos + 98, yPos + 42, 60, 15, Text.translatable("wildfire_gender.cloud.sync"), this::sync);
+		//btnSyncNow.setActive(GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED));
+		btnSyncNow.visible = GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
+		this.addDrawableChild(btnSyncNow);
 
-		this.addDrawableChild(new WildfireButton(this.width / 2 + 85, yPos - 11, 9, 9, Text.literal("X"),
+		this.addDrawableChild(new WildfireButton(this.width / 2 + 73, yPos - 11, 9, 9, Text.literal("X"),
 				button -> close(), text -> GuiUtils.doneNarrationText()));
 
 		super.init();
@@ -109,6 +121,7 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 				var actualException = e instanceof CompletionException ce ? ce.getCause() : e;
 				if(actualException instanceof SyncingTooFrequentlyException) {
 					WildfireGender.LOGGER.warn("Failed to sync settings as we've already synced too recently");
+					WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_SYNC_TOO_FREQUENTLY);
 				} else {
 					WildfireGender.LOGGER.error("Failed to sync settings", actualException);
 				}
@@ -120,23 +133,40 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 	@Override
 	public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		this.renderInGameBackground(ctx);
-		ctx.drawTexture(RenderLayer::getGuiTextured, BACKGROUND, (this.width - 203) / 2, (this.height - 117) / 2, 0, 0, 203, 117, 256, 256);
+		ctx.drawTexture(RenderLayer::getGuiTextured, BACKGROUND, (this.width - 172) / 2, (this.height - 124) / 2, 0, 0, 172, 144, 256, 256);
 	}
 
 	@Override
 	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		if(client == null || client.world == null) return;
 		super.render(ctx, mouseX, mouseY, delta);
+
 		int x = this.width / 2;
 		int y = this.height / 2;
+		int yPos = y - 47;
 
-		ctx.drawText(textRenderer, Text.translatable("wildfire_gender.cloud.status"), x - 95, y - 40, 0x000000, false);
-		ctx.drawText(textRenderer, Text.translatable("wildfire_gender.cloud.automatic"), x - 95, y - 16, 0x000000, false);
+		ctx.drawText(textRenderer, getTitle(), x - 79, yPos - 10, 4473924, false);
+		ctx.drawText(textRenderer, Text.translatable("wildfire_gender.cloud.status_log"), x - 79, yPos + 49, 4473924, false);
+
+		for(int i = STATUS_LOG.size()-1; i >= 0; i--) {
+			int reverseIndex = STATUS_LOG.size() - 1 - i;
+
+			if (reverseIndex < 6) {
+				ctx.drawText(textRenderer, STATUS_LOG.get(i), x - 78, yPos + 111 - (reverseIndex * 10), 0x00FF00, false);
+			}
+		}
 	}
 
 	@Override
 	public void close() {
 		GlobalConfig.INSTANCE.save();
 		super.close();
+	}
+
+	public static void log(Text text) {
+		STATUS_LOG.add(text);
+		if(STATUS_LOG.size() > 6) {
+			STATUS_LOG.removeFirst(); //remove first entry since it's never seen again
+		}
 	}
 }
