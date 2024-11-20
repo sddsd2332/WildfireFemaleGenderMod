@@ -33,7 +33,6 @@ import net.minecraft.util.math.MathHelper;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.Iterator;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
@@ -63,8 +62,8 @@ public final class GuiUtils {
 	}
 
 	public static void drawCenteredTextWrapped(DrawContext ctx, TextRenderer textRenderer, StringVisitable text, int x, int y, int width, int color) {
-		for(Iterator var7 = textRenderer.wrapLines(text, width).iterator(); var7.hasNext(); y += 9) {
-			OrderedText orderedText = (OrderedText)var7.next();
+		for(var var7 = textRenderer.wrapLines(text, width).iterator(); var7.hasNext(); y += 9) {
+			OrderedText orderedText = var7.next();
 			GuiUtils.drawCenteredText(ctx, textRenderer, orderedText, x, y, color);
 			Objects.requireNonNull(textRenderer);
 		}

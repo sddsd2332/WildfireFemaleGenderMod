@@ -18,8 +18,11 @@
 
 package com.wildfire.main;
 
-import com.wildfire.gui.screen.*;
+import com.wildfire.gui.screen.BaseWildfireScreen;
+import com.wildfire.gui.screen.WardrobeBrowserScreen;
+import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
 import com.wildfire.main.cloud.CloudSync;
+import com.wildfire.main.cloud.SyncLog;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
@@ -165,10 +168,10 @@ public final class WildfireEventHandler {
 						try {
 							CloudSync.sync(clientConfig).join();
 							WildfireGender.LOGGER.info("Synced player data to the cloud");
-							WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_SYNC_TO_CLOUD);
+							SyncLog.add(WildfireLocalization.SYNC_LOG_SYNC_TO_CLOUD);
 						} catch(Exception e) {
 							WildfireGender.LOGGER.error("Failed to sync player data", e);
-							WildfireCloudSyncScreen.log(WildfireLocalization.SYNC_LOG_FAILED_TO_SYNC_DATA);
+							SyncLog.add(WildfireLocalization.SYNC_LOG_FAILED_TO_SYNC_DATA);
 						}
 					});
 					clientConfig.needsCloudSync = false;
