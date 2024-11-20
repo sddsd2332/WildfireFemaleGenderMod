@@ -104,8 +104,6 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 		var clientUUID = client.player.getUuid();
 		return CompletableFuture.runAsync(() -> {
 			var clientConfig = WildfireGender.getOrAddPlayerById(clientUUID);
-			// if the player has a local config, assume that needsCloudSync is already set to true, and as such
-			// their config will be synced on the next attempt
 			if(!clientConfig.hasLocalConfig()) {
 				try {
 					// note that we wait for this to ensure that we don't have any inconsistencies with the synced
@@ -121,6 +119,8 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 				PlayerConfig.saveGenderInfo(clientConfig);
 				// don't immediately re-sync the data we just got back to the cloud
 				clientConfig.needsCloudSync = false;
+			} else {
+				clientConfig.needsCloudSync = true;
 			}
 		});
 	}
