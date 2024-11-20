@@ -18,7 +18,11 @@
 
 package com.wildfire.main;
 
+import com.wildfire.gui.screen.BaseWildfireScreen;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
+import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
+import com.wildfire.main.cloud.CloudSync;
+import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
 import com.wildfire.main.networking.ServerboundSyncPacket;
@@ -55,6 +59,7 @@ import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public final class WildfireEventHandler {
 	private WildfireEventHandler() {
@@ -144,16 +149,39 @@ public final class WildfireEventHandler {
 	private static void onClientTick(MinecraftClient client) {
 		if(client.world == null || client.player == null) return;
 
+		PlayerConfig clientConfig = WildfireGender.getPlayerById(client.player.getUuid());
+		timer++;
+
 		// Only attempt to sync if the server will accept the packet, and only once every 5 ticks, or around 4 times a second
-		if(ServerboundSyncPacket.canSend() && timer++ % 5 == 0) {
-			PlayerConfig aPlr = WildfireGender.getPlayerById(client.player.getUuid());
+		if(ServerboundSyncPacket.canSend() && timer % 5 == 0) {
 			// sendToServer will only actually send a packet if any changes have been made that need to be synced,
 			// or if we haven't synced before.
-			if(aPlr != null) WildfireSync.sendToServer(aPlr);
+			if(clientConfig != null) WildfireSync.sendToServer(clientConfig);
+		}
+
+		if(timer % 40 == 0) {
+			CloudSync.sendNextQueueBatch();
+			if(clientConfig != null && clientConfig.needsCloudSync && !(client.currentScreen instanceof BaseWildfireScreen)) {
+				if(GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) && !CloudSync.syncOnCooldown()) {
+					CompletableFuture.runAsync(() -> {
+						try {
+							CloudSync.sync(clientConfig).join();
+							WildfireGender.LOGGER.info("Synced player data to the cloud");
+						} catch(Exception e) {
+							WildfireGender.LOGGER.error("Failed to sync player data", e);
+						}
+					});
+					clientConfig.needsCloudSync = false;
+				}
+			}
 		}
 
 		if(CONFIG_KEYBIND.wasPressed() && client.currentScreen == null) {
-			client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
+			if(GlobalConfig.INSTANCE.get(GlobalConfig.FIRST_TIME_LOAD) && CloudSync.isAvailable()) {
+				client.setScreen(new WildfireFirstTimeSetupScreen(null, client.player.getUuid()));
+			} else {
+				client.setScreen(new WardrobeBrowserScreen(null, client.player.getUuid()));
+			}
 		}
 	}
 

@@ -28,6 +28,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -46,6 +47,8 @@ public class WildfireSlider extends ClickableWidget {
 	private float lastValue;
 	private boolean changed;
 
+	private double arrowKeyStep = 0.05;
+
 	public WildfireSlider(int xPos, int yPos, int width, int height, FloatConfigKey config, double currentVal, FloatConsumer valueUpdate,
 	                      Float2ObjectFunction<Text> messageUpdate, FloatConsumer onSave) {
 		this(xPos, yPos, width, height, config.getMinInclusive(), config.getMaxInclusive(), currentVal, valueUpdate, messageUpdate, onSave);
@@ -60,6 +63,10 @@ public class WildfireSlider extends ClickableWidget {
 		this.messageUpdate = messageUpdate;
 		this.onSave = onSave;
 		setValueInternal(currentVal);
+	}
+
+	public void setArrowKeyStep(double arrowKeyStep) {
+		this.arrowKeyStep = arrowKeyStep;
 	}
 
 	protected void updateMessage() {
@@ -94,11 +101,23 @@ public class WildfireSlider extends ClickableWidget {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		boolean result = super.keyPressed(keyCode, scanCode, modifiers);
-		if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT) {
-			save();
+		if(keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT) {
+			value += (keyCode == GLFW.GLFW_KEY_LEFT ? -arrowKeyStep : arrowKeyStep);
+			value = MathHelper.clamp(value, 0, 1);
+			applyValue();
+			updateMessage();
+			return true;
 		}
-		return result;
+		return super.keyPressed(keyCode, scanCode, modifiers);
+	}
+
+	@Override
+	public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+		if(keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT) {
+			save();
+			return true;
+		}
+		return super.keyReleased(keyCode, scanCode, modifiers);
 	}
 
 	protected MutableText getNarrationMessage() {
@@ -109,7 +128,6 @@ public class WildfireSlider extends ClickableWidget {
 	protected void renderWidget(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		if (this.visible) {
 			RenderSystem.disableDepthTest();
-			this.hovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
 
 			int xP = getX() + 2;
 			ctx.fill(xP - 2, getY(), getX() + this.width - 1, getY() + this.height, 0x222222 + (128 << 24));
@@ -122,7 +140,7 @@ public class WildfireSlider extends ClickableWidget {
 			TextRenderer font = MinecraftClient.getInstance().textRenderer;
 			int i = this.getX() + 2;
 			int j = this.getX() + this.getWidth() - 2;
-			GuiUtils.drawScrollableTextWithoutShadow(ctx, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), this.hovered || changed ? 0xFFFF55 : 0xFFFFFF);
+			GuiUtils.drawScrollableTextWithoutShadow(ctx, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), isSelected() || changed ? 0xFFFF55 : 0xFFFFFF);
 		}
 	}
 
@@ -148,21 +166,23 @@ public class WildfireSlider extends ClickableWidget {
 
 	protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {
 		this.setValueFromMouse(mouseX);
-		super.onDrag(mouseX, mouseY, deltaX, deltaY);
 	}
 
 	@Override
-	public void appendClickableNarrations(NarrationMessageBuilder builder) {}
+	public void appendClickableNarrations(NarrationMessageBuilder builder) {
+		builder.put(NarrationPart.TITLE, Text.translatable("gui.narrate.slider", this.getMessage()));
+		if(active) {
+			if(isFocused()) {
+				builder.put(NarrationPart.USAGE, Text.translatable("narration.slider.usage.focused"));
+			} else {
+				builder.put(NarrationPart.USAGE, Text.translatable("narration.slider.usage.hovered"));
+			}
+		}
+	}
 
 	private void setValueFromMouse(double mouseX) {
 		this.value = ((mouseX - (double)(this.getX() + 4)) / (double)(this.getWidth() - 8));
-		if (this.value < 0.0F) {
-			this.value = 0.0F;
-		}
-
-		if (this.value > 1.0F) {
-			this.value = 1.0F;
-		}
+		this.value = MathHelper.clamp(this.value, 0, 1);
 		applyValue();
 		updateMessage();
 	}

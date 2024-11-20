@@ -18,6 +18,8 @@
 
 package com.wildfire.main;
 
+import com.google.gson.JsonObject;
+import com.wildfire.main.cloud.CloudSync;
 import com.wildfire.main.entitydata.PlayerConfig;
 import com.wildfire.main.networking.WildfireSync;
 import com.wildfire.resources.GenderArmorResourceManager;
@@ -27,7 +29,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Util;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -45,13 +47,33 @@ public class WildfireGenderClient implements ClientModInitializer {
 		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(GenderArmorResourceManager.INSTANCE);
 	}
 
-	public static CompletableFuture<@Nullable PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync) {
-		return CompletableFuture.supplyAsync(() -> PlayerConfig.loadCachedPlayer(uuid, markForSync), LOAD_EXECUTOR);
+	public static CompletableFuture<@NotNull PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync, boolean bypassQueue) {
+		return CompletableFuture.supplyAsync(() -> {
+			var player = WildfireGender.getOrAddPlayerById(uuid);
+			if(player.hasLocalConfig()) {
+				player.loadFromDisk(markForSync);
+			} else if(player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
+				JsonObject data;
+				try {
+					var future = bypassQueue ? CloudSync.getProfile(uuid) : CloudSync.queueFetch(uuid);
+					data = future.join();
+				} catch(Exception e) {
+					WildfireGender.LOGGER.error("Failed to fetch profile from sync server", e);
+					throw e;
+				}
+				// make sure the server we're connected to hasn't provided player data while we were fetching data from
+				// the sync server
+				if(data != null && player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
+					player.updateFromJson(data);
+				}
+			}
+			return player;
+		}, LOAD_EXECUTOR);
 	}
 
 	public static void loadPlayerIfMissing(UUID uuid, boolean markForSync) {
 		if(WildfireGender.PLAYER_CACHE.containsKey(uuid)) return;
 		WildfireGender.getOrAddPlayerById(uuid);
-		loadGenderInfo(uuid, markForSync);
+		loadGenderInfo(uuid, markForSync, false);
 	}
 }

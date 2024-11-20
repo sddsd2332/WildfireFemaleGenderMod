@@ -30,7 +30,6 @@ import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.entitydata.PlayerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -61,9 +60,6 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
         int y = this.height / 2;
         int yPos = y - 47;
         int xPos = x - 156 / 2 - 1;
-
-        this.addDrawableChild(new WildfireButton(this.width / 2 + 73, yPos - 11, 9, 9, Text.literal("X"),
-                button -> MinecraftClient.getInstance().setScreen(parent)));
 
         this.addDrawableChild(new WildfireButton(xPos, yPos, 157, 20,
                 Text.translatable("wildfire_gender.char_settings.physics", aPlr.hasBreastPhysics() ? ENABLED : DISABLED), button -> {
@@ -106,6 +102,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
+        this.bounceSlider.setArrowKeyStep(0.005);
 
         this.addDrawableChild(this.floppySlider = new WildfireSlider(xPos, yPos + 80, 158, 20, Configuration.FLOPPY_MULTIPLIER, aPlr.getFloppiness(), value -> {
         }, value -> Text.translatable("wildfire_gender.slider.floppy", Math.round(value * 100)), value -> {
@@ -113,6 +110,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
+        this.floppySlider.setArrowKeyStep(0.01);
 
         this.addDrawableChild(new WildfireButton(xPos, yPos + 100, 157, 20,
                 Text.translatable("wildfire_gender.char_settings.hurt_sounds", aPlr.hasHurtSounds() ? ENABLED : DISABLED), button -> {
@@ -122,6 +120,9 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }, Tooltip.of(Text.translatable("wildfire_gender.tooltip.hurt_sounds"))));
+
+        this.addDrawableChild(new WildfireButton(this.width / 2 + 73, yPos - 11, 9, 9, Text.literal("X"),
+                button -> close(), text -> GuiUtils.doneNarrationText()));
 
         super.init();
     }

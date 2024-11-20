@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 public class PlayerConfig extends EntityConfig {
 
 	public boolean needsSync;
+	public boolean needsCloudSync;
 	public SyncStatus syncStatus = SyncStatus.UNKNOWN;
 
 	private final Configuration cfg;
@@ -136,57 +137,60 @@ public class PlayerConfig extends EntityConfig {
 		return this.syncStatus;
 	}
 
+	/**
+	 * @deprecated Use {@link #toJson()} instead
+	 */
+	@Deprecated
 	public static JsonObject toJsonObject(PlayerConfig plr) {
-		JsonObject obj = new JsonObject();
-		Configuration.USERNAME.save(obj, plr.uuid);
-		Configuration.GENDER.save(obj, plr.getGender());
-		Configuration.BUST_SIZE.save(obj, plr.getBustSize());
-		Configuration.HURT_SOUNDS.save(obj, plr.hasHurtSounds());
-
-		Configuration.BREAST_PHYSICS.save(obj, plr.hasBreastPhysics());
-		Configuration.SHOW_IN_ARMOR.save(obj, plr.showBreastsInArmor());
-		Configuration.ARMOR_PHYSICS_OVERRIDE.save(obj, plr.getArmorPhysicsOverride());
-		Configuration.BOUNCE_MULTIPLIER.save(obj, plr.getBounceMultiplier());
-		Configuration.FLOPPY_MULTIPLIER.save(obj, plr.getFloppiness());
-
-		Breasts breasts = plr.getBreasts();
-		Configuration.BREASTS_OFFSET_X.save(obj, breasts.getXOffset());
-		Configuration.BREASTS_OFFSET_Y.save(obj, breasts.getYOffset());
-		Configuration.BREASTS_OFFSET_Z.save(obj, breasts.getZOffset());
-		Configuration.BREASTS_UNIBOOB.save(obj, breasts.isUniboob());
-		Configuration.BREASTS_CLEAVAGE.save(obj, breasts.getCleavage());
-		return obj;
+		return plr.toJson();
 	}
 
+	public JsonObject toJson() {
+		return cfg.SAVE_VALUES.deepCopy();
+	}
+
+	public boolean hasLocalConfig() {
+		return cfg.exists();
+	}
+
+	public void loadFromDisk(boolean markForSync) {
+		this.syncStatus = SyncStatus.CACHED;
+		cfg.load();
+		loadFromConfig(markForSync);
+	}
+
+	public void loadFromConfig(boolean markForSync) {
+		updateGender(cfg.get(Configuration.GENDER));
+		updateBustSize(cfg.get(Configuration.BUST_SIZE));
+		updateHurtSounds(cfg.get(Configuration.HURT_SOUNDS));
+
+		//physics
+		updateBreastPhysics(cfg.get(Configuration.BREAST_PHYSICS));
+		updateShowBreastsInArmor(cfg.get(Configuration.SHOW_IN_ARMOR));
+		updateArmorPhysicsOverride(cfg.get(Configuration.ARMOR_PHYSICS_OVERRIDE));
+		updateBounceMultiplier(cfg.get(Configuration.BOUNCE_MULTIPLIER));
+		updateFloppiness(cfg.get(Configuration.FLOPPY_MULTIPLIER));
+
+		breasts.updateXOffset(cfg.get(Configuration.BREASTS_OFFSET_X));
+		breasts.updateYOffset(cfg.get(Configuration.BREASTS_OFFSET_Y));
+		breasts.updateZOffset(cfg.get(Configuration.BREASTS_OFFSET_Z));
+		breasts.updateUniboob(cfg.get(Configuration.BREASTS_UNIBOOB));
+		breasts.updateCleavage(cfg.get(Configuration.BREASTS_CLEAVAGE));
+		if(markForSync) {
+			this.needsSync = true;
+		}
+	}
+
+	/**
+	 * @deprecated Use {@link #loadFromDisk(boolean)} instead
+	 */
+	@Deprecated
 	public static PlayerConfig loadCachedPlayer(UUID uuid, boolean markForSync) {
 		PlayerConfig plr = WildfireGender.getPlayerById(uuid);
-		if (plr != null) {
-			plr.syncStatus = SyncStatus.CACHED;
-			Configuration config = plr.getConfig();
-			config.load();
-			plr.updateGender(config.get(Configuration.GENDER));
-			plr.updateBustSize(config.get(Configuration.BUST_SIZE));
-			plr.updateHurtSounds(config.get(Configuration.HURT_SOUNDS));
-
-			//physics
-			plr.updateBreastPhysics(config.get(Configuration.BREAST_PHYSICS));
-			plr.updateShowBreastsInArmor(config.get(Configuration.SHOW_IN_ARMOR));
-			plr.updateArmorPhysicsOverride(config.get(Configuration.ARMOR_PHYSICS_OVERRIDE));
-			plr.updateBounceMultiplier(config.get(Configuration.BOUNCE_MULTIPLIER));
-			plr.updateFloppiness(config.get(Configuration.FLOPPY_MULTIPLIER));
-
-			Breasts breasts = plr.getBreasts();
-			breasts.updateXOffset(config.get(Configuration.BREASTS_OFFSET_X));
-			breasts.updateYOffset(config.get(Configuration.BREASTS_OFFSET_Y));
-			breasts.updateZOffset(config.get(Configuration.BREASTS_OFFSET_Z));
-			breasts.updateUniboob(config.get(Configuration.BREASTS_UNIBOOB));
-			breasts.updateCleavage(config.get(Configuration.BREASTS_CLEAVAGE));
-			if (markForSync) {
-				plr.needsSync = true;
-			}
-			return plr;
+		if (plr != null && plr.hasLocalConfig()) {
+			plr.loadFromDisk(markForSync);
 		}
-		return null;
+		return plr;
 	}
 
 	public static void saveGenderInfo(PlayerConfig plr) {
@@ -211,11 +215,18 @@ public class PlayerConfig extends EntityConfig {
 
 		config.save();
 		plr.needsSync = true;
+		plr.needsCloudSync = true;
 	}
 
 	@Override
 	public boolean hasJacketLayer() {
 		throw new UnsupportedOperationException("PlayerConfig does not support #hasJacketLayer(); use PlayerEntity#isPartVisible instead");
+	}
+
+	public void updateFromJson(JsonObject json) {
+		json.asMap().forEach(this.cfg.SAVE_VALUES::add);
+		loadFromConfig(false);
+		this.syncStatus = SyncStatus.SYNCED;
 	}
 
 	public enum SyncStatus {
