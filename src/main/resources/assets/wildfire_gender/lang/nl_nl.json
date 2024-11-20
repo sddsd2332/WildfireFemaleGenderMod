@@ -27,17 +27,17 @@
 
 	"wildfire_gender.appearance_settings.title": "Uiterlijk instellingen",
 	"wildfire_gender.char_settings.title": "Karakter Instellingen",
-	"wildfire_gender.char_settings.physics": "Borst Zwaartekracht: %s",
+	"wildfire_gender.char_settings.physics": "Borst Bewegingen: %s",
 
-	"wildfire_gender.char_settings.override_armor_physics": "Harnas Zwaartekracht: %s",
-	"wildfire_gender.tooltip.override_armor_physics.line1": "Borst zwaartekracht zal niet langer onderdrukt worden bij jouw aangetrokken harnas, als dit aan staat",
+	"wildfire_gender.char_settings.override_armor_physics": "Beweegt in Harnas: %s",
+	"wildfire_gender.tooltip.override_armor_physics.line1": "De borst bewegingen zullen niet langer onderdrukt worden bij jouw aangetrokken harnas, als dit aan staat",
 	"wildfire_gender.tooltip.override_armor_physics.line2": "Dit is bedoeld voor het gebruik met bronpakketen die harnas verstoppen of iets in die geest",
 
 	"wildfire_gender.char_settings.hide_in_armor": "Verstop In Harnas: %s",
 	"wildfire_gender.char_settings.hurt_sounds": "Vrouwelijke Pijn Geluiden: %s",
 	"wildfire_gender.tooltip.hurt_sounds": "Jou karakter zal een vrouwelijke pijn geluid spelen als je schade neemt en als je geslacht is ingesteld op Vrouwelijk of Anders",
 
-	"wildfire_gender.breast_customization.dual_physics": "Dubbel-Zwaartekracht: %s",
+	"wildfire_gender.breast_customization.dual_physics": "Dubbele Bewegingen: %s",
 
 	"wildfire_gender.label.gender": "Geslacht",
 	"wildfire_gender.label.female": "Vrouwelijk",
@@ -49,13 +49,33 @@
 	"wildfire_gender.label.yes": "Ja",
 	"wildfire_gender.label.no": "Nee",
 	"wildfire_gender.label.with_creator": "Je speelt op een server met de maker van deze mod!",
+	"wildfire_gender.label.with_contributor": "Je speelt op een server met een bijdrager van deze mod!",
+	"wildfire_gender.label.with_both": "Je speelt op een server met de maker en een bijdrager van deze mod!",
 
-	"wildfire_gender.slider.bounce": "Verkracht Intensiteit: %s%%",
+	"wildfire_gender.slider.bounce": "Veerkracht Intensiteit: %s%%",
 	"wildfire_gender.slider.floppy": "Borst Momentum: %s%%",
-	"wildfire_gender.slider.min_bounce": "Waarom Is Zwaartekracht Aan?",
-	"wildfire_gender.slider.max_bounce": "Anime Borst Zwaartekracht!!!",
-	"wildfire_gender.tooltip.bounce_warning": "Instelling 'Verkracht Intensiteit' op een hoog nummer ziet er erg niet natuurlijk uit!",
+	"wildfire_gender.slider.min_bounce": "Waarom Staan De Bewegingen Aan?",
+	"wildfire_gender.slider.max_bounce": "Anime Borst Bewegingen!!!",
+	"wildfire_gender.tooltip.bounce_warning": "Instelling 'Veerkracht Intensiteit' op een hoog nummer ziet er erg niet natuurlijk uit!",
 
 	"wildfire_gender.cancer_awareness.title": "Hé, het is Borst Kanker Aandacht Maand",
-	"wildfire_gender.coming_soon": "Komt Binnenkort"
+	"wildfire_gender.coming_soon": "Komt Binnenkort",
+
+	"wildfire_gender.first_time_setup.title": "Welkom bij Wildfire's Vrouwelijke Geslachts Mod!",
+	"wildfire_gender.first_time_setup.description": "Wil je de optie aanzetten om je geslachts instellingen online te Synchroniseren? Hier mee kunnen anderen jouw aangepaste geslacht uiterlijk, zelfs al heeft de server deze mod niet geïnstalleerd.",
+	"wildfire_gender.first_time_setup.notice": "Je kunt dit later altijd aanpassen in het mod menu.",
+	"wildfire_gender.first_time_setup.enable": "Zet Online Synchronisatie Aan",
+	"wildfire_gender.first_time_setup.disable": "Zet Online Synchronisatie Uit",
+
+	"wildfire_gender.cloud_settings": "Online Synchronisatie Instellingen",
+	"wildfire_gender.cloud.available_online": "Online Synchronisatie",
+	"wildfire_gender.cloud.unavailable_offline": "Online synchronisatie is niet beschikbaar, omdat je niet bent ingelogd in een geldig Minecraft account",
+	"wildfire_gender.cloud.status": "Synchroniseren:",
+	"wildfire_gender.cloud.automatic": "Automatische Synchronisatie:",
+	"wildfire_gender.cloud.automatic.tooltip.line1": "Wanner dit aanstaat, jouw configuratie wordt automatisch online gesynchroniseerd na dat je aanpassingen maakt.",
+	"wildfire_gender.cloud.sync": "Synchroniseer",
+	"wildfire_gender.cloud.automatic.tooltip.line2": "Je kan nog steeds manueel synchroniseren met de knop hier onder, als dit uitstaat.",
+	"wildfire_gender.cloud.syncing": "Synchroniseren...",
+	"wildfire_gender.cloud.syncing.success": "Gesynchroniseerd",
+	"wildfire_gender.cloud.syncing.fail": "Synchronisatie Niet Gelukt"
 }
