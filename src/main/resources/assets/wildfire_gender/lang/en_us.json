@@ -86,6 +86,9 @@
 	"wildfire_gender.sync_log.authentication_success": "Authentication Successful.",
 	"wildfire_gender.sync_log.authentication_failed": "Failed Authentication.",
 	"wildfire_gender.sync_log.reauthenticating": "Re-Authenticating Account...",
+
+	"wildfire_gender.sync_log.failed_to_sync_data": "Failed to Sync Data.",
+	"wildfire_gender.sync_log.sync_to_cloud": "Syncing Data to Cloud...",
 	"wildfire_gender.sync_log.attempting_sync": "Syncing Profile...",
 	"wildfire_gender.sync_log.sync_success": "Sync Successful.",
 	"wildfire_gender.sync_log.sync_too_frequently": "Sync Rate Limited."

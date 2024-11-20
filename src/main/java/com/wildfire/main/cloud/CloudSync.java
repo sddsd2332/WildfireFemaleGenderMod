@@ -28,7 +28,7 @@ import com.mojang.authlib.HttpAuthenticationService;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.util.InstantTypeAdapter;
 import com.wildfire.gui.screen.WildfireCloudSyncScreen;
-import com.wildfire.gui.screen.WildfireLocalization;
+import com.wildfire.main.WildfireLocalization;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.WildfireHelper;
 import com.wildfire.main.config.GlobalConfig;

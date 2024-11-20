@@ -16,7 +16,7 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.wildfire.gui.screen;
+package com.wildfire.main;
 
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -35,6 +35,9 @@ public class WildfireLocalization {
     public static final Text SYNC_LOG_ATTMEPTING_SYNC = Text.translatable("wildfire_gender.sync_log.attempting_sync");
     public static final Text SYNC_LOG_SYNC_SUCCESS = Text.translatable("wildfire_gender.sync_log.sync_success");
     public static final Text SYNC_LOG_SYNC_TOO_FREQUENTLY = Text.translatable("wildfire_gender.sync_log.sync_too_frequently");
+    public static final Text SYNC_LOG_FAILED_TO_SYNC_DATA = Text.translatable("wildfire_gender.sync_log.failed_to_sync_data");
+    public static final Text SYNC_LOG_SYNC_TO_CLOUD = Text.translatable("wildfire_gender.sync_log.sync_to_cloud");
+
 
 
 }

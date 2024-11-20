@@ -21,6 +21,7 @@ package com.wildfire.gui.screen;
 import com.wildfire.gui.GuiUtils;
 import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.WildfireGender;
+import com.wildfire.main.WildfireLocalization;
 import com.wildfire.main.cloud.CloudSync;
 import com.wildfire.main.cloud.SyncingTooFrequentlyException;
 import com.wildfire.main.config.GlobalConfig;
@@ -141,7 +142,7 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 			int reverseIndex = STATUS_LOG.size() - 1 - i;
 
 			if (reverseIndex < 6) {
-				ctx.drawText(textRenderer, STATUS_LOG.get(i), x - 78, yPos + 111 - (reverseIndex * 10), 0x00FF00, false);
+				GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, STATUS_LOG.get(i), x - 78, yPos + 111 - (reverseIndex * 10), (x - 78) + 156, (yPos + 111 - (reverseIndex * 10)) + 10, 0x00FF00);
 			}
 		}
 	}

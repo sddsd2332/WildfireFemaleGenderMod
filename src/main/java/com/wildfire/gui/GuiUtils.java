@@ -38,6 +38,10 @@ import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
 public final class GuiUtils {
+	public enum Justify {
+		LEFT, CENTER
+	}
+
 	private GuiUtils() {
 		throw new UnsupportedOperationException();
 	}
@@ -68,24 +72,28 @@ public final class GuiUtils {
 	}
 
 	// Reimplementation of ClickableWidget#drawScrollableText but with the text shadow removed
-	public static void drawScrollableTextWithoutShadow(DrawContext context, TextRenderer textRenderer, Text text, int left, int top, int right, int bottom, int color) {
-	    int i = textRenderer.getWidth(text);
-	    int var10000 = top + bottom;
-	    Objects.requireNonNull(textRenderer);
-	    int j = (var10000 - 9) / 2 + 1;
-	    int k = right - left;
-	    if (i > k) {
-	        int l = i - k;
-	        double d = (double) Util.getMeasuringTimeMs() / 1000.0;
-	        double e = Math.max((double)l * 0.5, 3.0);
-	        double f = Math.sin(1.5707963267948966 * Math.cos(6.283185307179586 * d / e)) / 2.0 + 0.5;
-	        double g = MathHelper.lerp(f, 0.0, l);
-	        context.enableScissor(left, top, right, bottom);
-	        context.drawText(textRenderer, text, left - (int)g, j, color, false);
-	        context.disableScissor();
-	    } else {
-	        drawCenteredText(context, textRenderer, text, (left + right) / 2, j, color);
-	    }
+	public static void drawScrollableTextWithoutShadow(Justify justify, DrawContext context, TextRenderer textRenderer, Text text, int left, int top, int right, int bottom, int color) {
+		int i = textRenderer.getWidth(text);
+		int var10000 = top + bottom;
+		Objects.requireNonNull(textRenderer);
+		int j = (var10000 - 9) / 2 + 1;
+		int k = right - left;
+		if (i > k) {
+			int l = i - k;
+			double d = (double) Util.getMeasuringTimeMs() / 1000.0;
+			double e = Math.max((double)l * 0.5, 3.0);
+			double f = Math.sin(1.5707963267948966 * Math.cos(6.283185307179586 * d / e)) / 2.0 + 0.5;
+			double g = MathHelper.lerp(f, 0.0, l);
+			context.enableScissor(left, top, right, bottom);
+			context.drawText(textRenderer, text, left - (int)g, j, color, false);
+			context.disableScissor();
+		} else {
+			if(justify == Justify.CENTER) {
+				drawCenteredText(context, textRenderer, text, (left + right) / 2, j, color);
+			} else if(justify == Justify.LEFT) {
+				context.drawText(textRenderer, text, left, j, color, false);
+			}
+		}
 	}
 
 	// Reimplementation of InventoryScreen#drawEntity, intended to allow for applying our own scissor calls, and
