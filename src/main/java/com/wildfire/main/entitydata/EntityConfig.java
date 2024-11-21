@@ -18,6 +18,9 @@
 
 package com.wildfire.main.entitydata;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.wildfire.api.IGenderArmor;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.WildfireHelper;
@@ -36,9 +39,8 @@ import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.time.Duration;
 import java.util.Objects;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -50,7 +52,14 @@ import java.util.UUID;
  */
 public class EntityConfig {
 
-	public static final Map<UUID, EntityConfig> ENTITY_CACHE = new HashMap<>();
+	public static final LoadingCache<UUID, EntityConfig> CACHE = CacheBuilder.newBuilder()
+			.expireAfterAccess(Duration.ofMinutes(5))
+			.build(new CacheLoader<>() {
+				@Override
+				public @NotNull EntityConfig load(@NotNull UUID key) {
+					return new EntityConfig(key);
+				}
+			});
 
 	public final UUID uuid;
 	protected Gender gender = Configuration.GENDER.getDefault();
@@ -111,13 +120,17 @@ public class EntityConfig {
 	/**
 	 * Get the configuration for a given entity
 	 *
+	 * @apiNote Configuration settings for {@link PlayerConfig}s may not be immediately available upon being
+	 *          returned, and may take several seconds to be populated if loaded from the
+	 *          {@link com.wildfire.main.cloud.CloudSync cloud sync server}.
+	 *
 	 * @return The relevant {@link EntityConfig}, or {@link PlayerConfig} if given a {@link PlayerEntity player}
 	 */
-	public static @Nullable EntityConfig getEntity(@NotNull LivingEntity entity) {
+	public static @NotNull EntityConfig getEntity(@NotNull LivingEntity entity) {
 		if(entity instanceof PlayerEntity) {
-			return WildfireGender.getPlayerById(entity.getUuid());
+			return WildfireGender.getOrAddPlayerById(entity.getUuid());
 		}
-		return ENTITY_CACHE.computeIfAbsent(entity.getUuid(), EntityConfig::new);
+		return CACHE.getUnchecked(entity.getUuid());
 	}
 
 	public @NotNull Gender getGender() {
