@@ -86,6 +86,8 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 		btnAutomaticSync.setActive(CloudSync.isEnabled());
 
 		btnSyncNow = new WildfireButton(xPos + 98, yPos + 42, 60, 15, Text.translatable("wildfire_gender.cloud.sync"), this::sync);
+		//btnSyncNow.setTooltip(Tooltip.of(Text.empty()
+		//		.append(Text.literal("Sync Server data is cached for a minimum time of 30 minutes. If you do not see any changes please try to re-sync later."))));
 		btnSyncNow.visible = GlobalConfig.INSTANCE.get(GlobalConfig.CLOUD_SYNC_ENABLED);
 		this.addDrawableChild(btnSyncNow);
 
@@ -134,6 +136,12 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 				x - 79, y - 12, x - 79 + 150, y - 11 + 10, 4473924);
 		GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, Text.translatable("wildfire_gender.cloud.status_log"),
 				x - 79, y + 47, x - 79 + 95, y + 48 + 10, 4473924);
+
+
+		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, Text.translatable("wildfire_gender.cloud.disclaimer.line1")
+						.append("\n\n")
+						.append(Text.translatable("wildfire_gender.cloud.disclaimer.line2")),
+				x, y + 142, 240, 0xFFFFFF);
 
 		for(int i = SyncLog.SYNC_LOG.size() - 1; i >= 0; i--) {
 			int reverseIndex = SyncLog.SYNC_LOG.size() - 1 - i;
