@@ -127,7 +127,6 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 		if(ent == null) return;
 
 		EntityConfig entityConfig = EntityConfig.getEntity(ent);
-		if(entityConfig == null) return;
 
 		try {
 			if(!setupRender(state, entityConfig)) return;

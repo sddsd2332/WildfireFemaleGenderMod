@@ -96,7 +96,6 @@ public class GenderArmorLayer<S extends BipedEntityRenderState, M extends BipedE
 
 		try {
 			entityConfig = EntityConfig.getEntity(ent);
-			if(entityConfig == null) return;
 
 			if(!setupRender(state, entityConfig)) return;
 			if(ent instanceof ArmorStandEntity && !genderArmor.armorStandsCopySettings()) return;

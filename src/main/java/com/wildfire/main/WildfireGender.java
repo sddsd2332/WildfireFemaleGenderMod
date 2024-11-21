@@ -18,8 +18,12 @@
 
 package com.wildfire.main;
 
+import java.time.Duration;
 import java.util.*;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.mojang.logging.LogUtils;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
@@ -32,10 +36,35 @@ import org.slf4j.Logger;
 public class WildfireGender implements ModInitializer {
 	public static final String MODID = "wildfire_gender";
 	public static final Logger LOGGER = LogUtils.getLogger();
-	public static final Map<UUID, PlayerConfig> PLAYER_CACHE = new HashMap<>();
+	public static final LoadingCache<UUID, PlayerConfig> CACHE;
+
+	static {
+		var builder = CacheBuilder.newBuilder();
+		// Only automatically expire cache entries on the client; a server may go a decent while without accessing
+		// the player cache, and we can't easily re-cache a player's settings on a server, while a client
+		// will typically either receive settings from the server in a sync, or simply re-fetch from
+		// a local config file or from the cloud.
+		// Note that servers will manually invalidate cache entries upon a player disconnecting
+		// (see WildfireEventHandler#playerDisconnected).
+		if(WildfireHelper.onClient()) {
+			builder.expireAfterAccess(Duration.ofMinutes(15));
+		}
+		CACHE = builder.build(new CacheLoader<>() {
+			@Override
+			public @NotNull PlayerConfig load(@NotNull UUID key) {
+				var config = new PlayerConfig(key);
+				// only attempt to load player data on the client, and if the provided uuid is valid
+				if(WildfireHelper.onClient() && key.version() == 4) {
+					// markForSync being true will only ever do anything for the client player
+					WildfireGenderClient.loadGenderInfo(config, true, false);
+				}
+				return config;
+			}
+		});
+	}
 
 	public static final UUID CREATOR_UUID = UUID.fromString("23b6feed-2dfe-4f2e-9429-863fd4adb946");
-	public static final List<UUID> CONTRIBUTOR_UUIDS = Arrays.asList(
+	public static final List<UUID> CONTRIBUTOR_UUIDS = List.of(
 			UUID.fromString("70336328-0de7-430e-8cba-2779e2a05ab5"), //celeste
 			UUID.fromString("64e57307-72e5-4f43-be9c-181e8e35cc9b"), //pupnewfster
 			UUID.fromString("618a8390-51b1-43b2-a53a-ab72c1bbd8bd"), //Kichura
@@ -55,10 +84,10 @@ public class WildfireGender implements ModInitializer {
 	}
 
 	public static @Nullable PlayerConfig getPlayerById(UUID id) {
-		return PLAYER_CACHE.get(id);
+		return CACHE.getIfPresent(id);
 	}
 
 	public static @NotNull PlayerConfig getOrAddPlayerById(UUID id) {
-		return PLAYER_CACHE.computeIfAbsent(id, PlayerConfig::new);
+		return CACHE.getUnchecked(id);
 	}
 }

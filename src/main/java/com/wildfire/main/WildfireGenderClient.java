@@ -30,6 +30,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -47,9 +48,17 @@ public class WildfireGenderClient implements ClientModInitializer {
 		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(GenderArmorResourceManager.INSTANCE);
 	}
 
-	public static CompletableFuture<@NotNull PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync, boolean bypassQueue) {
+	public static CompletableFuture<@Nullable PlayerConfig> loadGenderInfo(UUID uuid, boolean markForSync, boolean bypassQueue) {
+		var cache = WildfireGender.getPlayerById(uuid);
+		if(cache == null) {
+			return CompletableFuture.completedFuture(null);
+		}
+		return loadGenderInfo(cache, markForSync, bypassQueue);
+	}
+
+	public static CompletableFuture<@NotNull PlayerConfig> loadGenderInfo(PlayerConfig player, boolean markForSync, boolean bypassQueue) {
 		return CompletableFuture.supplyAsync(() -> {
-			var player = WildfireGender.getOrAddPlayerById(uuid);
+			var uuid = player.uuid;
 			if(player.hasLocalConfig()) {
 				player.loadFromDisk(markForSync);
 			} else if(player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
@@ -65,15 +74,12 @@ public class WildfireGenderClient implements ClientModInitializer {
 				// the sync server
 				if(data != null && player.syncStatus == PlayerConfig.SyncStatus.UNKNOWN) {
 					player.updateFromJson(data);
+					if(markForSync) {
+						player.needsSync = true;
+					}
 				}
 			}
 			return player;
 		}, LOAD_EXECUTOR);
-	}
-
-	public static void loadPlayerIfMissing(UUID uuid, boolean markForSync) {
-		if(WildfireGender.PLAYER_CACHE.containsKey(uuid)) return;
-		WildfireGender.getOrAddPlayerById(uuid);
-		loadGenderInfo(uuid, markForSync, false);
 	}
 }

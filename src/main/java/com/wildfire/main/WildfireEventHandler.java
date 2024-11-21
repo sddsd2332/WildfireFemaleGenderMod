@@ -41,7 +41,6 @@ import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
@@ -59,7 +58,6 @@ import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class WildfireEventHandler {
@@ -97,7 +95,6 @@ public final class WildfireEventHandler {
 	 */
 	@Environment(EnvType.CLIENT)
 	public static void registerClientEvents() {
-		ClientEntityEvents.ENTITY_LOAD.register(WildfireEventHandler::onEntityLoad);
 		ClientEntityEvents.ENTITY_UNLOAD.register(WildfireEventHandler::onEntityUnload);
 		ClientTickEvents.END_CLIENT_TICK.register(WildfireEventHandler::onClientTick);
 		ClientPlayConnectionEvents.DISCONNECT.register(WildfireEventHandler::clientDisconnect);
@@ -120,26 +117,13 @@ public final class WildfireEventHandler {
 	}
 
 	/**
-	 * Load data for a loaded player if applicable
-	 */
-	@Environment(EnvType.CLIENT)
-	private static void onEntityLoad(Entity entity, World world) {
-		if(!world.isClient() || MinecraftClient.getInstance().player == null) return;
-		if(entity instanceof AbstractClientPlayerEntity plr) {
-			UUID uuid = plr.getUuid();
-			boolean isClientPlayer = uuid.equals(MinecraftClient.getInstance().player.getUuid());
-			WildfireGenderClient.loadPlayerIfMissing(uuid, isClientPlayer);
-		}
-	}
-
-	/**
 	 * Remove (non-player) entities from the client cache when they're unloaded
 	 */
 	@Environment(EnvType.CLIENT)
 	private static void onEntityUnload(Entity entity, World world) {
 		// note that we don't attempt to unload players; they're instead only ever unloaded once we leave a world,
 		// or once they disconnect
-		EntityConfig.ENTITY_CACHE.remove(entity.getUuid());
+		EntityConfig.CACHE.invalidate(entity.getUuid());
 	}
 
 	/**
@@ -193,15 +177,15 @@ public final class WildfireEventHandler {
 	 */
 	@Environment(EnvType.CLIENT)
 	private static void clientDisconnect(ClientPlayNetworkHandler networkHandler, MinecraftClient client) {
-		WildfireGender.PLAYER_CACHE.clear();
-		EntityConfig.ENTITY_CACHE.clear();
+		WildfireGender.CACHE.invalidateAll();
+		EntityConfig.CACHE.invalidateAll();
 	}
 
 	/**
 	 * Removes a disconnecting player from the cache on a server
 	 */
 	private static void playerDisconnected(ServerPlayNetworkHandler handler, MinecraftServer server) {
-		WildfireGender.PLAYER_CACHE.remove(handler.getPlayer().getUuid());
+		WildfireGender.CACHE.invalidate(handler.getPlayer().getUuid());
 	}
 
 	/**

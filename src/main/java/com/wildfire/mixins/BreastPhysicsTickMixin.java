@@ -40,7 +40,6 @@ abstract class BreastPhysicsTickMixin {
 		if(!entity.getWorld().isClient()) return;
 
 		EntityConfig cfg = EntityConfig.getEntity(entity);
-		if(cfg == null) return;
 		if(entity instanceof ArmorStandEntity) {
 			cfg.readFromStack(entity.getEquippedStack(EquipmentSlot.CHEST));
 		}

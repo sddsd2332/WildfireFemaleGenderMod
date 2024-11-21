@@ -96,4 +96,8 @@ public final class WildfireHelper {
         var mod = FabricLoader.getInstance().getModContainer(modId).orElseThrow();
         return mod.getMetadata().getVersion().getFriendlyString();
     }
+
+    public static boolean onClient() {
+        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+    }
 }
