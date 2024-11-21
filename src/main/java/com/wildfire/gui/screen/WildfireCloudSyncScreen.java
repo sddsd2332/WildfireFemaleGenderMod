@@ -47,6 +47,7 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 
 	private WildfireButton btnAutomaticSync = null;
 	private WildfireButton btnSyncNow = null;
+	private WildfireButton btnHelp = null;
 
 	protected WildfireCloudSyncScreen(Screen parent, UUID uuid) {
 		super(Text.translatable("wildfire_gender.cloud_settings"), parent, uuid);
@@ -94,6 +95,12 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 		this.addDrawableChild(new WildfireButton(this.width / 2 + 73, yPos - 11, 9, 9, Text.literal("X"),
 				button -> close(), text -> GuiUtils.doneNarrationText()));
 
+		this.addDrawableChild(btnHelp = new WildfireButton(this.width / 2 + 73 - 10, yPos - 11, 9, 9, Text.literal("?"),
+				button -> { /* TODO: Maybe make a new page with instructions / detail on how the sync feature works */ }, text -> GuiUtils.doneNarrationText()));
+		btnHelp.setTooltip(Tooltip.of(Text.translatable("wildfire_gender.cloud.disclaimer.line1")
+				.append("\n\n")
+				.append(Text.translatable("wildfire_gender.cloud.disclaimer.line2"))));
+
 		super.init();
 	}
 
@@ -133,15 +140,9 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 		y -= 47;
 
 		GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, getTitle(),
-				x - 79, y - 12, x - 79 + 150, y - 11 + 10, 4473924);
+				x - 79, y - 12, x - 79 + 141, y - 11 + 10, 4473924);
 		GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.LEFT, ctx, textRenderer, Text.translatable("wildfire_gender.cloud.status_log"),
 				x - 79, y + 47, x - 79 + 95, y + 48 + 10, 4473924);
-
-
-		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, Text.translatable("wildfire_gender.cloud.disclaimer.line1")
-						.append("\n\n")
-						.append(Text.translatable("wildfire_gender.cloud.disclaimer.line2")),
-				x, y + 142, 240, 0xFFFFFF);
 
 		for(int i = SyncLog.SYNC_LOG.size() - 1; i >= 0; i--) {
 			int reverseIndex = SyncLog.SYNC_LOG.size() - 1 - i;

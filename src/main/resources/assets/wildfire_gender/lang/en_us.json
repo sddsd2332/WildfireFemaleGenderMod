@@ -81,7 +81,7 @@
 
 	"wildfire_gender.cloud.syncing.success": "Synced",
 	"wildfire_gender.cloud.syncing.fail": "Sync Failed",
-	"wildfire_gender.cloud.disclaimer.line1": "Sync Server data is cached for at least 30 minutes.",
+	"wildfire_gender.cloud.disclaimer.line1": "Sync Server data may be cached for at least 30 minutes.",
 	"wildfire_gender.cloud.disclaimer.line2": "If changes are not visible, please try re-syncing later.",
 
 	"wildfire_gender.sync_log.authenticating": "Authenticating Account...",
