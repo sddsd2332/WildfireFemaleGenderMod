@@ -96,7 +96,10 @@ public class WildfireCloudSyncScreen extends BaseWildfireScreen {
 				button -> close(), text -> GuiUtils.doneNarrationText()));
 
 		this.addDrawableChild(btnHelp = new WildfireButton(this.width / 2 + 73 - 10, yPos - 11, 9, 9, Text.literal("?"),
-				button -> { /* TODO: Maybe make a new page with instructions / detail on how the sync feature works */ }, text -> GuiUtils.doneNarrationText()));
+				button -> {
+					//client.setScreen(new WildfireCloudDetailsScreen(this, client.player.getUuid())); // Disabled for now. Not complete
+					// BUTTON IS SUPPOSED TO DO NOTHING AT THE MOMENT
+				}, text -> GuiUtils.doneNarrationText()));
 		btnHelp.setTooltip(Tooltip.of(Text.translatable("wildfire_gender.cloud.disclaimer.line1")
 				.append("\n\n")
 				.append(Text.translatable("wildfire_gender.cloud.disclaimer.line2"))));
