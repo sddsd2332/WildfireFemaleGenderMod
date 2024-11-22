@@ -88,5 +88,9 @@
 	"wildfire_gender.sync_log.sync_success": "Sychronisatie Gelukt.",
 	"wildfire_gender.sync_log.sync_too_frequently": "Sychronisatie Tarief is Beperkt.",
 	"wildfire_gender.cloud.disclaimer.line1": "Server Sychronisatie date wordt mogelijk gecachd voor minimaal 30 minuten.",
-	"wildfire_gender.cloud.disclaimer.line2": "Als de aanpassen niet zichtbaar zijn, synchroniseer later opnieuw aub."
+	"wildfire_gender.cloud.disclaimer.line2": "Als de aanpassen niet zichtbaar zijn, synchroniseer later opnieuw aub.",
+	"wildfire_gender.details.next_page": "Volgende Pagina",
+	"wildfire_gender.details.prev_page": "Vorige Pagina",
+	"wildfire_gender.cloud_details.title": "Online Synchronisatie Server Informatie"
 }
+
