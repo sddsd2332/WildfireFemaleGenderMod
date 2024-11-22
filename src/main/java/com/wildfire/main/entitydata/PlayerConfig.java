@@ -71,6 +71,7 @@ public class PlayerConfig extends EntityConfig {
 		this.cfg.setDefault(Configuration.SHOW_IN_ARMOR);
 		this.cfg.setDefault(Configuration.BOUNCE_MULTIPLIER);
 		this.cfg.setDefault(Configuration.FLOPPY_MULTIPLIER);
+		this.cfg.setDefault(Configuration.VOICE_PITCH);
 	}
 
 	// this shouldn't ever be called on players, but just to be safe, override with a noop.
@@ -99,6 +100,10 @@ public class PlayerConfig extends EntityConfig {
 
 	public boolean hasHurtSounds() {
 		return hurtSounds;
+	}
+
+	public boolean updateVoicePitch(float value) {
+		return updateValue(Configuration.VOICE_PITCH, value, v -> this.voicePitch = v);
 	}
 
 	public boolean updateHurtSounds(boolean value) {
@@ -163,6 +168,7 @@ public class PlayerConfig extends EntityConfig {
 		updateGender(cfg.get(Configuration.GENDER));
 		updateBustSize(cfg.get(Configuration.BUST_SIZE));
 		updateHurtSounds(cfg.get(Configuration.HURT_SOUNDS));
+		updateVoicePitch(cfg.get(Configuration.VOICE_PITCH));
 
 		//physics
 		updateBreastPhysics(cfg.get(Configuration.BREAST_PHYSICS));
@@ -176,6 +182,7 @@ public class PlayerConfig extends EntityConfig {
 		breasts.updateZOffset(cfg.get(Configuration.BREASTS_OFFSET_Z));
 		breasts.updateUniboob(cfg.get(Configuration.BREASTS_UNIBOOB));
 		breasts.updateCleavage(cfg.get(Configuration.BREASTS_CLEAVAGE));
+
 		if(markForSync) {
 			this.needsSync = true;
 		}
@@ -199,6 +206,7 @@ public class PlayerConfig extends EntityConfig {
 		config.set(Configuration.GENDER, plr.getGender());
 		config.set(Configuration.BUST_SIZE, plr.getBustSize());
 		config.set(Configuration.HURT_SOUNDS, plr.hasHurtSounds());
+		config.set(Configuration.VOICE_PITCH, plr.getVoicePitch());
 
 		//physics
 		config.set(Configuration.BREAST_PHYSICS, plr.hasBreastPhysics());

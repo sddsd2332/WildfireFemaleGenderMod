@@ -46,7 +46,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
     private static final Text DISABLED = Text.translatable("wildfire_gender.label.disabled").formatted(Formatting.RED);
     private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/settings_bg.png");
 
-    private WildfireSlider bounceSlider, floppySlider;
+    private WildfireSlider bounceSlider, floppySlider, voicePitchSlider;
     private boolean bounceWarning;
 
     protected WildfireCharacterSettingsScreen(Screen parent, UUID uuid) {
@@ -120,6 +120,14 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }, Tooltip.of(Text.translatable("wildfire_gender.tooltip.hurt_sounds"))));
+
+        this.addDrawableChild(this.voicePitchSlider = new WildfireSlider(xPos, yPos + 120, 158, 20, Configuration.VOICE_PITCH, aPlr.getVoicePitch(), value -> {
+        }, value -> Text.translatable("wildfire_gender.slider.voice_pitch", Math.round(value * 100)), value -> {
+            if (aPlr.updateVoicePitch(value)) {
+                PlayerConfig.saveGenderInfo(aPlr);
+            }
+        }));
+        this.voicePitchSlider.setArrowKeyStep(0.01);
 
         this.addDrawableChild(new WildfireButton(this.width / 2 + 73, yPos - 11, 9, 9, Text.literal("X"),
                 button -> close(), text -> GuiUtils.doneNarrationText()));

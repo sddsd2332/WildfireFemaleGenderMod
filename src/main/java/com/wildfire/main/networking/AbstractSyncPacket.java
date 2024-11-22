@@ -19,6 +19,7 @@
 package com.wildfire.main.networking;
 
 import com.mojang.datafixers.util.Function6;
+import com.mojang.datafixers.util.Function7;
 import com.wildfire.main.entitydata.Breasts;
 import com.wildfire.main.entitydata.PlayerConfig;
 import com.wildfire.main.Gender;
@@ -37,6 +38,7 @@ abstract class AbstractSyncPacket {
                 Gender.CODEC, p -> p.gender,
                 PacketCodecs.FLOAT, p -> p.bustSize,
                 PacketCodecs.BOOL, p -> p.hurtSounds,
+                PacketCodecs.FLOAT, p -> p.voicePitch,
                 BreastPhysics.CODEC, p -> p.physics,
                 Breasts.CODEC, p -> p.breasts,
                 constructor
@@ -47,26 +49,29 @@ abstract class AbstractSyncPacket {
     protected final Gender gender;
     protected final float bustSize;
     protected final boolean hurtSounds;
+    protected final float voicePitch;
     protected final BreastPhysics physics;
     protected final Breasts breasts;
 
-    protected AbstractSyncPacket(UUID uuid, Gender gender, float bustSize, boolean hurtSounds, BreastPhysics physics, Breasts breasts) {
+    protected AbstractSyncPacket(UUID uuid, Gender gender, float bustSize, boolean hurtSounds, float voicePitch, BreastPhysics physics, Breasts breasts) {
         this.uuid = uuid;
         this.gender = gender;
         this.bustSize = bustSize;
         this.hurtSounds = hurtSounds;
+        this.voicePitch = voicePitch;
         this.physics = physics;
         this.breasts = breasts;
     }
 
     protected AbstractSyncPacket(PlayerConfig plr) {
-        this(plr.uuid, plr.getGender(), plr.getBustSize(), plr.hasHurtSounds(), new BreastPhysics(plr), plr.getBreasts());
+        this(plr.uuid, plr.getGender(), plr.getBustSize(), plr.hasHurtSounds(), plr.getVoicePitch(), new BreastPhysics(plr), plr.getBreasts());
     }
 
     protected void updatePlayerFromPacket(PlayerConfig plr) {
         plr.updateGender(gender);
         plr.updateBustSize(bustSize);
         plr.updateHurtSounds(hurtSounds);
+        plr.updateVoicePitch(voicePitch);
         physics.applyTo(plr);
         plr.getBreasts().copyFrom(breasts);
     }
@@ -94,6 +99,6 @@ abstract class AbstractSyncPacket {
     }
 
     @FunctionalInterface
-    protected interface SyncPacketConstructor<T extends AbstractSyncPacket> extends Function6<UUID, Gender, Float, Boolean, BreastPhysics, Breasts, T> {
+    protected interface SyncPacketConstructor<T extends AbstractSyncPacket> extends Function7<UUID, Gender, Float, Boolean, Float, BreastPhysics, Breasts, T> {
     }
 }

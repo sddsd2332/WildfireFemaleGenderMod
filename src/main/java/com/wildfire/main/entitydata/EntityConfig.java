@@ -67,6 +67,9 @@ public class EntityConfig {
 	protected boolean breastPhysics = Configuration.BREAST_PHYSICS.getDefault();
 	protected float bounceMultiplier = Configuration.BOUNCE_MULTIPLIER.getDefault();
 	protected float floppyMultiplier = Configuration.FLOPPY_MULTIPLIER.getDefault();
+
+	protected float voicePitch = Configuration.VOICE_PITCH.getDefault();
+
 	// note: hurt sounds, armor physics override, and show in armor are not defined here, as they have no relevance
 	// to entities, and are instead entirely in PlayerConfig
 
@@ -163,6 +166,10 @@ public class EntityConfig {
 
 	public float getFloppiness() {
 		return this.floppyMultiplier;
+	}
+
+	public float getVoicePitch() {
+		return this.voicePitch;
 	}
 
 	public @NotNull BreastPhysics getLeftBreastPhysics() {

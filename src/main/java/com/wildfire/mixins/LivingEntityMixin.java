@@ -52,8 +52,8 @@ abstract class LivingEntityMixin {
 
 			SoundEvent hurtSound = genderPlayer.getGender().getHurtSound();
 			if(hurtSound != null) {
-				float pitch = (player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.2F + 1.0F;
-				player.playSound(hurtSound, 1f, pitch);
+				float pitch = (player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.2F /*+ 1.0F*/; // +1 is from getVoicePitch()
+				player.playSound(hurtSound, 1f, pitch + genderPlayer.getVoicePitch());
 			}
 		}
 	}

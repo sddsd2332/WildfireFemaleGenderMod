@@ -25,6 +25,7 @@
 	"wildfire_gender.wardrobe.slider.height": "Height: %s",
 	"wildfire_gender.wardrobe.slider.depth": "Depth: %s",
 	"wildfire_gender.wardrobe.slider.rotation": "Rotation: %s degrees",
+	"wildfire_gender.slider.voice_pitch": "Voice Pitch: %s%%",
 
 	"wildfire_gender.appearance_settings.title": "Appearance Settings",
 	"wildfire_gender.char_settings.title": "Character Settings",
