@@ -21,6 +21,7 @@ package com.wildfire.gui.screen;
 import com.wildfire.gui.GuiUtils;
 import com.wildfire.gui.WildfireSlider;
 import com.wildfire.main.WildfireGender;
+import com.wildfire.main.WildfireSounds;
 import com.wildfire.main.config.Configuration;
 
 import java.util.Objects;
@@ -30,11 +31,13 @@ import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.entitydata.PlayerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -125,6 +128,13 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
         }, value -> Text.translatable("wildfire_gender.slider.voice_pitch", Math.round(value * 100)), value -> {
             if (aPlr.updateVoicePitch(value)) {
                 PlayerConfig.saveGenderInfo(aPlr);
+                if(client.player != null) {
+                    SoundEvent hurtSound = aPlr.getGender().getHurtSound();
+                    if(hurtSound != null) {
+                        float pitch = (client.player.getRandom().nextFloat() - client.player.getRandom().nextFloat()) * 0.2F /*+ 1.0F*/; // +1 is from getVoicePitch()
+                        client.player.playSound(hurtSound, 1f, pitch + aPlr.getVoicePitch());
+                    }
+                }
             }
         }));
         this.voicePitchSlider.setArrowKeyStep(0.01);
@@ -139,7 +149,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
     public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
         this.renderInGameBackground(ctx);
 
-        ctx.drawTexture(RenderLayer::getGuiTextured, BACKGROUND, (this.width - 172) / 2, (this.height - 124) / 2, 0, 0, 172, 144, 256, 256);
+        ctx.drawTexture(RenderLayer::getGuiTextured, BACKGROUND, (this.width - 172) / 2, (this.height - 124) / 2, 0, 0, 172, 164, 256, 256);
     }
 
     @Override
