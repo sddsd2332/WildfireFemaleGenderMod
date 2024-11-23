@@ -108,6 +108,11 @@ public final class GuiUtils {
 		float m = entity.getPitch();
 		float n = entity.prevHeadYaw;
 		float o = entity.headYaw;
+
+		ctx.getMatrices().push();
+
+		ctx.getMatrices().translate(0, 0, 50.0); //prevent rear model clipping
+
 		entity.bodyYaw = 180.0F + i * 20.0F;
 		entity.setYaw(180.0F + i * 40.0F);
 		entity.setPitch(-j * 20.0F);
@@ -121,5 +126,6 @@ public final class GuiUtils {
 		entity.setPitch(m);
 		entity.prevHeadYaw = n;
 		entity.headYaw = o;
+		ctx.getMatrices().pop();
 	}
 }
