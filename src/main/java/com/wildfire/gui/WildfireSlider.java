@@ -132,15 +132,23 @@ public class WildfireSlider extends ClickableWidget {
 			int xP = getX() + 2;
 			ctx.fill(xP - 2, getY(), getX() + this.width - 1, getY() + this.height, 0x222222 + (128 << 24));
 			int xPos = getX() + 2 + (int) (this.value * (float)(this.width - 3));
-			ctx.fill(getX() + 1, getY() + 1, xPos - 1, getY() + this.height - 1, 0x222266 + (180 << 24));
 
-			int xPos2 = this.getX() + 3 + (int) (this.value * (float)(this.width - 5));
-			ctx.fill(xPos2 - 2, getY() + 1, xPos2, getY() + this.height - 1, 0xFFFFFF + (120 << 24));
+			ctx.fill(getX() + 1, getY() + 1, xPos - 1, getY() + this.height - 1, active?(0x222266 + (180 << 24)):(0x111133 + (180 << 24)));
+
+			if(active) {
+				int xPos2 = this.getX() + 3 + (int) (this.value * (float) (this.width - 5));
+				ctx.fill(xPos2 - 2, getY() + 1, xPos2, getY() + this.height - 1, 0xFFFFFF + (120 << 24));
+			}
 			RenderSystem.enableDepthTest();
 			TextRenderer font = MinecraftClient.getInstance().textRenderer;
 			int i = this.getX() + 2;
 			int j = this.getX() + this.getWidth() - 2;
-			GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.CENTER, ctx, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), isSelected() || changed ? 0xFFFF55 : 0xFFFFFF);
+
+			int textColor = (isSelected()&&active) || changed ? 0xFFFF55 : 0xFFFFFF;
+			if(!active) {
+				textColor = 0x666666;
+			}
+			GuiUtils.drawScrollableTextWithoutShadow(GuiUtils.Justify.CENTER, ctx, font, this.getMessage(), i, this.getY(), j, this.getY() + this.getHeight(), textColor);
 		}
 	}
 

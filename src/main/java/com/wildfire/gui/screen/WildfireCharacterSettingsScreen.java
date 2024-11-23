@@ -119,6 +119,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 Text.translatable("wildfire_gender.char_settings.hurt_sounds", aPlr.hasHurtSounds() ? ENABLED : DISABLED), button -> {
             boolean enableHurtSounds = !aPlr.hasHurtSounds();
             if (aPlr.updateHurtSounds(enableHurtSounds)) {
+                voicePitchSlider.active = aPlr.hasHurtSounds();
                 button.setMessage(Text.translatable("wildfire_gender.char_settings.hurt_sounds", enableHurtSounds ? ENABLED : DISABLED));
                 PlayerConfig.saveGenderInfo(aPlr);
             }
@@ -137,6 +138,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 }
             }
         }));
+        voicePitchSlider.active = aPlr.hasHurtSounds();
         this.voicePitchSlider.setArrowKeyStep(0.01);
 
         this.addDrawableChild(new WildfireButton(this.width / 2 + 73, yPos - 11, 9, 9, Text.literal("X"),
