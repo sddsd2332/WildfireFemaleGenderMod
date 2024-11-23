@@ -50,6 +50,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
     private static final Identifier BACKGROUND = Identifier.of(WildfireGender.MODID, "textures/gui/settings_bg.png");
 
     private WildfireSlider bounceSlider, floppySlider, voicePitchSlider;
+    private WildfireButton btnHideInArmor, btnOverrideArmorPhys;
     private boolean bounceWarning;
 
     protected WildfireCharacterSettingsScreen(Screen parent, UUID uuid) {
@@ -68,12 +69,18 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 Text.translatable("wildfire_gender.char_settings.physics", aPlr.hasBreastPhysics() ? ENABLED : DISABLED), button -> {
             boolean enablePhysics = !aPlr.hasBreastPhysics();
             if (aPlr.updateBreastPhysics(enablePhysics)) {
+
+                this.bounceSlider.active = aPlr.hasBreastPhysics();
+                this.floppySlider.active = aPlr.hasBreastPhysics();
+                //this.btnHideInArmor.active = aPlr.hasBreastPhysics();
+                this.btnOverrideArmorPhys.active = aPlr.hasBreastPhysics();
+
                 button.setMessage(Text.translatable("wildfire_gender.char_settings.physics", enablePhysics ? ENABLED : DISABLED));
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
 
-        this.addDrawableChild(new WildfireButton(xPos, yPos + 20, 157, 20,
+        this.addDrawableChild(btnHideInArmor = new WildfireButton(xPos, yPos + 20, 157, 20,
                 Text.translatable("wildfire_gender.char_settings.hide_in_armor", aPlr.showBreastsInArmor() ? DISABLED : ENABLED), button -> {
             boolean enableShowInArmor = !aPlr.showBreastsInArmor();
             if (aPlr.updateShowBreastsInArmor(enableShowInArmor)) {
@@ -81,8 +88,10 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
+        //this.btnHideInArmor.active = aPlr.hasBreastPhysics();
 
-        this.addDrawableChild(new WildfireButton(xPos, yPos + 40, 157, 20,
+
+        this.addDrawableChild(btnOverrideArmorPhys = new WildfireButton(xPos, yPos + 40, 157, 20,
                 Text.translatable("wildfire_gender.char_settings.override_armor_physics", aPlr.getArmorPhysicsOverride() ? ENABLED : DISABLED), button -> {
             boolean enableArmorPhysicsOverride = !aPlr.getArmorPhysicsOverride();
             if (aPlr.updateArmorPhysicsOverride(enableArmorPhysicsOverride )) {
@@ -93,6 +102,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 .append("\n\n")
                 .append(Text.translatable("wildfire_gender.tooltip.override_armor_physics.line2")))
         ));
+        this.btnOverrideArmorPhys.active = aPlr.hasBreastPhysics();
 
         this.addDrawableChild(this.bounceSlider = new WildfireSlider(xPos, yPos + 60, 158, 20, Configuration.BOUNCE_MULTIPLIER, aPlr.getBounceMultiplier(), value -> {
         }, value -> {
@@ -105,6 +115,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
+        this.bounceSlider.active = aPlr.hasBreastPhysics();
         this.bounceSlider.setArrowKeyStep(0.005);
 
         this.addDrawableChild(this.floppySlider = new WildfireSlider(xPos, yPos + 80, 158, 20, Configuration.FLOPPY_MULTIPLIER, aPlr.getFloppiness(), value -> {
@@ -113,6 +124,7 @@ public class WildfireCharacterSettingsScreen extends BaseWildfireScreen {
                 PlayerConfig.saveGenderInfo(aPlr);
             }
         }));
+        this.floppySlider.active = aPlr.hasBreastPhysics();
         this.floppySlider.setArrowKeyStep(0.01);
 
         this.addDrawableChild(new WildfireButton(xPos, yPos + 100, 157, 20,
