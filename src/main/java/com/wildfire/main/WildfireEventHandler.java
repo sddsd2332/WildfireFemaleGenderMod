@@ -18,6 +18,7 @@
 
 package com.wildfire.main;
 
+import com.wildfire.gui.GuiUtils;
 import com.wildfire.gui.screen.BaseWildfireScreen;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
 import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
@@ -42,9 +43,7 @@ import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -61,14 +60,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public final class WildfireEventHandler {
@@ -115,25 +113,21 @@ public final class WildfireEventHandler {
 
 	@Environment(EnvType.CLIENT)
 	private static void renderHud(DrawContext context, RenderTickCounter tickCounter) {
-		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-		if(textRenderer == null) return;
-
-		//Render when in tab list, unless the toggle is enabled. Then always render it.
-		List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
-		if(
-				(MinecraftClient.getInstance().options.playerListKey.isPressed() && !(MinecraftClient.getInstance().currentScreen instanceof WardrobeBrowserScreen)) ||
-				GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
-
-			context.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, true);
-			int yPos = 18;
-			for(PlayerListEntry entry : syncedPlayers) {
-				PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
-				context.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
-				yPos += 10;
-			}
-
+		var textRenderer = Objects.requireNonNull(MinecraftClient.getInstance().textRenderer, "textRenderer");
+		if(MinecraftClient.getInstance().currentScreen instanceof WardrobeBrowserScreen) {
+			return;
 		}
+
+		boolean shouldShow = switch(GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
+			case MOD_UI_ONLY -> false;
+			case TAB_LIST_OPEN -> MinecraftClient.getInstance().options.playerListKey.isPressed();
+			case ALWAYS -> true;
+		};
+		if(!shouldShow) return;
+
+		GuiUtils.drawSyncedPlayers(context, textRenderer, collectPlayerEntries());
 	}
+
 	/**
 	 * Attach breast render layers to players and armor stands
 	 */
@@ -239,7 +233,7 @@ public final class WildfireEventHandler {
 
 
 	public static List<PlayerListEntry> collectPlayerEntries() {
-		if(MinecraftClient.getInstance().player == null) return new ArrayList<PlayerListEntry>();
+		if(MinecraftClient.getInstance().player == null) return new ArrayList<>();
 		ClientPlayerEntity player = MinecraftClient.getInstance().player;
 		return player.networkHandler.getListedPlayerListEntries().stream()
 				.filter(entry -> !entry.getProfile().getId().equals(player.getUuid()))

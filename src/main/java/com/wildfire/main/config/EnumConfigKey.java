@@ -19,20 +19,29 @@
 package com.wildfire.main.config;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.wildfire.main.Gender;
 
-public class GenderConfigKey extends EnumConfigKey<Gender> {
-    public GenderConfigKey(String key) {
-        super(key, Gender.MALE, Gender.BY_ID);
-    }
+import java.util.function.IntFunction;
 
-    @Override
-    protected Gender read(JsonElement element) {
-        // TODO is this still necessary? only extraordinarily old configs should still have this as a boolean
-        if(element instanceof JsonPrimitive primitive && primitive.isBoolean()) {
-            return primitive.getAsBoolean() ? Gender.MALE : Gender.FEMALE;
-        }
-        return super.read(element);
-    }
+public class EnumConfigKey<TYPE extends Enum<TYPE>> extends ConfigKey<TYPE> {
+	private final IntFunction<TYPE> ordinal;
+
+	public EnumConfigKey(String key, TYPE defaultValue, IntFunction<TYPE> ordinalMapper) {
+		super(key, defaultValue);
+		this.ordinal = ordinalMapper;
+	}
+
+	@Override
+	protected TYPE read(JsonElement element) {
+		if(element instanceof JsonPrimitive prim && prim.isNumber()) {
+			return ordinal.apply(prim.getAsInt());
+		}
+		return defaultValue;
+	}
+
+	@Override
+	public void save(JsonObject object, TYPE value) {
+		object.addProperty(key, value.ordinal());
+	}
 }

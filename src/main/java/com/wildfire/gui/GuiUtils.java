@@ -18,21 +18,26 @@
 
 package com.wildfire.gui;
 
+import com.wildfire.main.WildfireGender;
+import com.wildfire.main.entitydata.PlayerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
@@ -127,5 +132,20 @@ public final class GuiUtils {
 		entity.prevHeadYaw = n;
 		entity.headYaw = o;
 		ctx.getMatrices().pop();
+	}
+
+	public static void drawSyncedPlayers(DrawContext context, TextRenderer textRenderer, List<PlayerListEntry> syncedPlayers) {
+		if(syncedPlayers.isEmpty()) return;
+		var header = Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA);
+		context.drawText(textRenderer, header, 5, 5, 0xFFFFFF, true);
+
+		int yPos = 18;
+		for(PlayerListEntry entry : syncedPlayers) {
+			PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
+			if(cfg == null) continue;
+			var text = Text.literal(entry.getProfile().getName()).append(" - ").append(cfg.getGender().getDisplayName());
+			context.drawText(textRenderer, text, 10, yPos, 0xFFFFFF, false);
+			yPos += 10;
+		}
 	}
 }
