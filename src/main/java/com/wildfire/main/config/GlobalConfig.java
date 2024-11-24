@@ -13,11 +13,14 @@ public class GlobalConfig extends AbstractConfiguration {
     // see CloudSync#DEFAULT_CLOUD_URL for the actual default
     public static final StringConfigKey CLOUD_SERVER = new StringConfigKey("cloud_server", "");
 
+    public static final BooleanConfigKey ALWAYS_SHOW_LIST = new BooleanConfigKey("alwaysShowList", false);
+
     static {
         INSTANCE.setDefault(FIRST_TIME_LOAD);
         INSTANCE.setDefault(CLOUD_SYNC_ENABLED);
         INSTANCE.setDefault(AUTOMATIC_CLOUD_SYNC);
         INSTANCE.setDefault(CLOUD_SERVER);
+        INSTANCE.setDefault(ALWAYS_SHOW_LIST);
         if(!INSTANCE.exists()) {
             INSTANCE.save();
         }

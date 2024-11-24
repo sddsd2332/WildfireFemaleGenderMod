@@ -32,11 +32,14 @@ public class WildfireLocalization {
     public static final Text SYNC_LOG_AUTHENTICATION_FAILED = Text.translatable("wildfire_gender.sync_log.authentication_failed");
     public static final Text SYNC_LOG_AUTHENTICATION_SUCCESS = Text.translatable("wildfire_gender.sync_log.authentication_success");
     public static final Text SYNC_LOG_REAUTHENTICATING = Text.translatable("wildfire_gender.sync_log.reauthenticating");
-    public static final Text SYNC_LOG_ATTMEPTING_SYNC = Text.translatable("wildfire_gender.sync_log.attempting_sync");
+    public static final Text SYNC_LOG_ATTEMPTING_SYNC = Text.translatable("wildfire_gender.sync_log.attempting_sync");
     public static final Text SYNC_LOG_SYNC_SUCCESS = Text.translatable("wildfire_gender.sync_log.sync_success");
     public static final Text SYNC_LOG_SYNC_TOO_FREQUENTLY = Text.translatable("wildfire_gender.sync_log.sync_too_frequently");
     public static final Text SYNC_LOG_FAILED_TO_SYNC_DATA = Text.translatable("wildfire_gender.sync_log.failed_to_sync_data");
     public static final Text SYNC_LOG_SYNC_TO_CLOUD = Text.translatable("wildfire_gender.sync_log.sync_to_cloud");
+
+    public static final Text SYNC_LOG_GET_SINGLE_PROFILE = Text.translatable("wildfire_gender.sync_log.get_single_profile");
+    public static final Text SYNC_LOG_GET_MULTIPLE_PROFILES = Text.translatable("wildfire_gender.sync_log.get_multiple_profiles");
 
 
 

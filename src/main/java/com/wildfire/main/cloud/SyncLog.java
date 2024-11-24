@@ -10,6 +10,10 @@ import java.util.List;
 
 public final class SyncLog {
 	public static final List<Entry> SYNC_LOG = new ArrayList<>();
+	public static final int VERBOSITY_LEVEL = 2;
+
+	//1 = normal
+	//2 = log when profiles are retrieved
 
 	public static void add(Text text) {
 		SYNC_LOG.add(new Entry(text, Instant.now()));

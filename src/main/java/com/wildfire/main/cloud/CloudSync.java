@@ -233,7 +233,7 @@ public final class CloudSync {
 			var url = URI.create(getCloudServer() + "/" + config.uuid);
 			var json = config.toJson().toString();
 
-			SyncLog.add(WildfireLocalization.SYNC_LOG_ATTMEPTING_SYNC);
+			SyncLog.add(WildfireLocalization.SYNC_LOG_ATTEMPTING_SYNC);
 
 			var request = createRequest(url)
 					.PUT(HttpRequest.BodyPublishers.ofString(json))
@@ -295,6 +295,10 @@ public final class CloudSync {
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 
+			if(SyncLog.VERBOSITY_LEVEL == 2) {
+				SyncLog.add(WildfireLocalization.SYNC_LOG_GET_SINGLE_PROFILE);
+			}
+
 			var data = GSON.fromJson(response.body(), JsonObject.class);
 			FETCH_CACHE.put(uuid, Optional.of(data));
 			return data;
@@ -332,6 +336,9 @@ public final class CloudSync {
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 
+			if(SyncLog.VERBOSITY_LEVEL == 2) {
+				SyncLog.add(WildfireLocalization.SYNC_LOG_GET_MULTIPLE_PROFILES);
+			}
 			var data = GSON.fromJson(response.body(), BulkFetch.class).users();
 			uuids.forEach(uuid -> FETCH_CACHE.put(uuid, Optional.ofNullable(data.get(uuid))));
 			return data;

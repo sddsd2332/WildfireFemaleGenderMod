@@ -12,10 +12,12 @@
 	"wildfire_gender.player_list.breast_momentum": "Breast Momentum: %s%%",
 	"wildfire_gender.player_list.female_sounds": "Female Sounds: %s",
 	"wildfire_gender.wardrobe.players_using_mod": "Players using the mod:",
+	"wildfire_gender.always_show_list": "Always Show List: %s",
 
 	"wildfire_gender.wardrobe.title": "Wildfire's Female Gender Mod",
 	"wildfire_gender.breast_customization.tab_customization": "Customization",
-	"wildfire_gender.breast_customization.tab_presets": "Presets",
+	"wildfire_gender.breast_customization.tab_physics": "Breast Physics",
+	"wildfire_gender.breast_customization.tab_miscellaneous": "Miscellaneous",
 
 	"wildfire_gender.breast_customization.presets.add_new": "Add New...",
 	"wildfire_gender.breast_customization.presets.delete": "Delete",
@@ -24,11 +26,11 @@
 	"wildfire_gender.wardrobe.slider.separation": "Separation: %s",
 	"wildfire_gender.wardrobe.slider.height": "Height: %s",
 	"wildfire_gender.wardrobe.slider.depth": "Depth: %s",
-	"wildfire_gender.wardrobe.slider.rotation": "Rotation: %s degrees",
-	"wildfire_gender.slider.voice_pitch": "Voice Pitch: %s%%",
+	"wildfire_gender.wardrobe.slider.rotation": "Rotation: %s°",
+	"wildfire_gender.slider.voice_pitch": "Pitch: %s%%",
 
-	"wildfire_gender.appearance_settings.title": "Appearance Settings",
-	"wildfire_gender.char_settings.title": "Character Settings",
+	"wildfire_gender.appearance_settings.title": "Character Personalization",
+	"wildfire_gender.char_settings.title": "Character Settings OLD",
 	"wildfire_gender.char_settings.physics": "Breast Physics: %s",
 
 	"wildfire_gender.char_settings.override_armor_physics": "Armor Physics: %s",
@@ -48,6 +50,7 @@
 
 	"wildfire_gender.label.enabled": "Enabled",
 	"wildfire_gender.label.disabled": "Disabled",
+	"wildfire_gender.label.on": "On",
 	"wildfire_gender.label.off": "Off",
 	"wildfire_gender.label.yes": "Yes",
 	"wildfire_gender.label.no": "No",
@@ -55,9 +58,8 @@
 	"wildfire_gender.label.with_contributor": "You are playing on a server with a contributor of this mod!",
 	"wildfire_gender.label.with_both": "You are playing on a server with the creator and a contributor of this mod!",
 
-	"wildfire_gender.slider.bounce": "Bounce Intensity: %s%%",
-	"wildfire_gender.slider.floppy": "Breast Momentum: %s%%",
-	"wildfire_gender.tooltip.bounce_warning": "Setting 'Bounce Intensity' to a high value will look very unnatural!",
+	"wildfire_gender.slider.bounce": "Intensity: %s%%",
+	"wildfire_gender.slider.floppy": "Momentum: %s%%",
 
 	"wildfire_gender.cancer_awareness.title": "Hey, it's Breast Cancer Awareness Month!",
 
@@ -95,6 +97,9 @@
 	"wildfire_gender.sync_log.attempting_sync": "Syncing Profile...",
 	"wildfire_gender.sync_log.sync_success": "Sync Successful.",
 	"wildfire_gender.sync_log.sync_too_frequently": "Sync Rate Limited.",
+
+	"wildfire_gender.sync_log.get_single_profile": "Retrieving Profile...",
+	"wildfire_gender.sync_log.get_multiple_profiles": "Retrieving Batch of Profiles...",
 
 	"wildfire_gender.details.next_page": "Next Page",
 	"wildfire_gender.details.prev_page": "Prev Page",

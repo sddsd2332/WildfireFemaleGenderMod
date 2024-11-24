@@ -130,13 +130,13 @@ public class WildfireSlider extends ClickableWidget {
 			RenderSystem.disableDepthTest();
 
 			int xP = getX() + 2;
-			ctx.fill(xP - 2, getY(), getX() + this.width - 1, getY() + this.height, 0x222222 + (128 << 24));
+			ctx.fill(xP - 2, getY(), getX() + this.width, getY() + this.height, 0x222222 + (128 << 24));
 			int xPos = getX() + 2 + (int) (this.value * (float)(this.width - 3));
 
 			ctx.fill(getX() + 1, getY() + 1, xPos - 1, getY() + this.height - 1, active?(0x222266 + (180 << 24)):(0x111133 + (180 << 24)));
 
 			if(active) {
-				int xPos2 = this.getX() + 3 + (int) (this.value * (float) (this.width - 5));
+				int xPos2 = this.getX() + 3 + (int) (this.value * (float) (this.width - 4));
 				ctx.fill(xPos2 - 2, getY() + 1, xPos2, getY() + this.height - 1, 0xFFFFFF + (120 << 24));
 			}
 			RenderSystem.enableDepthTest();
