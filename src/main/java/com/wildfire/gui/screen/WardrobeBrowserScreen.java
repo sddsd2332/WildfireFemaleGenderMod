@@ -98,7 +98,7 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 		}));
 
 		WildfireButton btnCharacterPersonalization;
-		this.addDrawableChild(btnCharacterPersonalization = new WildfireButton(this.width / 2 - 36, this.height / 2 - 63, 158, 20, Text.translatable("wildfire_gender.appearance_settings.title").append("..."),
+		this.addDrawableChild(btnCharacterPersonalization = new WildfireButton(this.width / 2 - 36, this.height / 2 - 63, 157, 20, Text.translatable("wildfire_gender.appearance_settings.title").append("..."),
 				button -> client.setScreen(new WildfireBreastCustomizationScreen(WardrobeBrowserScreen.this, this.playerUUID))));
 
 		btnCharacterPersonalization.active = plr.getGender().canHaveBreasts();
