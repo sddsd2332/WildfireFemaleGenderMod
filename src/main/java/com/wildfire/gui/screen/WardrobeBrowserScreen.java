@@ -72,14 +72,14 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 
 
 		//TODO: Finish this
-		/*this.addDrawableChild(btnAlwaysShowList = new WildfireButton(126, 4, 140, 10,
+		this.addDrawableChild(btnAlwaysShowList = new WildfireButton(126, 4, 140, 10,
 			Text.translatable("wildfire_gender.always_show_list", GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST) ? WildfireLocalization.ENABLED : WildfireLocalization.DISABLED),
 			button -> {
 				var config = GlobalConfig.INSTANCE;
 				var newVal = !config.get(GlobalConfig.ALWAYS_SHOW_LIST);
 				config.set(GlobalConfig.ALWAYS_SHOW_LIST, newVal);
 				button.setMessage(Text.translatable("wildfire_gender.always_show_list", newVal ? WildfireLocalization.ENABLED : WildfireLocalization.DISABLED));
-			}));*/
+			}));
 
 		this.addDrawableChild(btnFemale = new WildfireButton(this.width / 2 - 130, this.height / 2 + 33, 80, 15, plr.getGender().getDisplayName(), button -> {
 			Gender gender = switch (plr.getGender()) {
@@ -185,16 +185,6 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 				GuiUtils.drawCenteredText(ctx, this.textRenderer, Text.translatable("wildfire_gender.label.with_contributor"), this.width / 2, creatorY, 0xFF00FF);
 			}
 
-			List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
-			if(!syncedPlayers.isEmpty() || GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
-				ctx.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
-				int yPos = 18;
-				for(PlayerListEntry entry : syncedPlayers) {
-					PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
-					ctx.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
-					yPos += 10;
-				}
-			}
 		}
 
 		if(isBreastCancerAwarenessMonth) {
@@ -206,14 +196,4 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 	}
 
 
-	private List<PlayerListEntry> collectPlayerEntries() {
-		return this.client.player.networkHandler.getListedPlayerListEntries().stream()
-				.filter(entry -> !entry.getProfile().getId().equals(client.player.getUuid()))
-				.filter(entry -> {
-					var cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
-					return cfg != null && cfg.getSyncStatus() != PlayerConfig.SyncStatus.UNKNOWN;
-				})
-				.limit(40L)
-				.toList();
-	}
 }

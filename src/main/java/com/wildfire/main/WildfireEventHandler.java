@@ -36,13 +36,19 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -54,10 +60,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public final class WildfireEventHandler {
@@ -99,8 +109,25 @@ public final class WildfireEventHandler {
 		ClientTickEvents.END_CLIENT_TICK.register(WildfireEventHandler::onClientTick);
 		ClientPlayConnectionEvents.DISCONNECT.register(WildfireEventHandler::clientDisconnect);
 		LivingEntityFeatureRendererRegistrationCallback.EVENT.register(WildfireEventHandler::registerRenderLayers);
+		HudRenderCallback.EVENT.register(WildfireEventHandler::renderHud);
 	}
 
+	@Environment(EnvType.CLIENT)
+	private static void renderHud(DrawContext context, RenderTickCounter tickCounter) {
+		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+		if(textRenderer == null) return;
+
+		List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
+		if(!syncedPlayers.isEmpty() || GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
+			context.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
+			int yPos = 18;
+			for(PlayerListEntry entry : syncedPlayers) {
+				PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
+				context.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
+				yPos += 10;
+			}
+		}
+	}
 	/**
 	 * Attach breast render layers to players and armor stands
 	 */
@@ -202,5 +229,19 @@ public final class WildfireEventHandler {
 			// of sync until they relog.
 			WildfireSync.sendToClient(syncTo, genderToSync);
 		}
+	}
+
+
+	private static List<PlayerListEntry> collectPlayerEntries() {
+		if(MinecraftClient.getInstance().player == null) return new ArrayList<PlayerListEntry>();
+		ClientPlayerEntity player = MinecraftClient.getInstance().player;
+		return player.networkHandler.getListedPlayerListEntries().stream()
+				.filter(entry -> !entry.getProfile().getId().equals(player.getUuid()))
+				.filter(entry -> {
+					var cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
+					return cfg != null && cfg.getSyncStatus() != PlayerConfig.SyncStatus.UNKNOWN;
+				})
+				.limit(40L)
+				.toList();
 	}
 }
