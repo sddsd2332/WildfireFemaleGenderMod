@@ -12,6 +12,7 @@
 	"wildfire_gender.player_list.breast_momentum": "Breast Momentum: %s%%",
 	"wildfire_gender.player_list.female_sounds": "Female Sounds: %s",
 	"wildfire_gender.wardrobe.players_using_mod": "Players using the mod:",
+	"wildfire_gender.always_show_list": "Always Show List: %s",
 
 	"wildfire_gender.wardrobe.title": "Wildfire's Female Gender Mod",
 	"wildfire_gender.breast_customization.tab_customization": "Customization",
@@ -26,7 +27,7 @@
 	"wildfire_gender.wardrobe.slider.height": "Height: %s",
 	"wildfire_gender.wardrobe.slider.depth": "Depth: %s",
 	"wildfire_gender.wardrobe.slider.rotation": "Rotation: %s°",
-	"wildfire_gender.slider.voice_pitch": "Voice Pitch: %s%%",
+	"wildfire_gender.slider.voice_pitch": "Pitch: %s%%",
 
 	"wildfire_gender.appearance_settings.title": "Character Personalization",
 	"wildfire_gender.char_settings.title": "Character Settings OLD",
@@ -49,6 +50,7 @@
 
 	"wildfire_gender.label.enabled": "Enabled",
 	"wildfire_gender.label.disabled": "Disabled",
+	"wildfire_gender.label.on": "On",
 	"wildfire_gender.label.off": "Off",
 	"wildfire_gender.label.yes": "Yes",
 	"wildfire_gender.label.no": "No",
@@ -56,9 +58,8 @@
 	"wildfire_gender.label.with_contributor": "You are playing on a server with a contributor of this mod!",
 	"wildfire_gender.label.with_both": "You are playing on a server with the creator and a contributor of this mod!",
 
-	"wildfire_gender.slider.bounce": "Bounce Intensity: %s%%",
-	"wildfire_gender.slider.floppy": "Breast Momentum: %s%%",
-	"wildfire_gender.tooltip.bounce_warning": "Setting 'Bounce Intensity' to a high value will look very unnatural!",
+	"wildfire_gender.slider.bounce": "Intensity: %s%%",
+	"wildfire_gender.slider.floppy": "Momentum: %s%%",
 
 	"wildfire_gender.cancer_awareness.title": "Hey, it's Breast Cancer Awareness Month!",
 
