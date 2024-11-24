@@ -118,7 +118,7 @@ public final class WildfireEventHandler {
 		if(textRenderer == null) return;
 
 		List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
-		if(!syncedPlayers.isEmpty() || GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
+		if((!syncedPlayers.isEmpty() && !GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST) && MinecraftClient.getInstance().currentScreen instanceof WardrobeBrowserScreen) || GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
 			context.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
 			int yPos = 18;
 			for(PlayerListEntry entry : syncedPlayers) {
