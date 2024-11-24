@@ -44,6 +44,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -117,15 +118,20 @@ public final class WildfireEventHandler {
 		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 		if(textRenderer == null) return;
 
+		//Render when in tab list, unless the toggle is enabled. Then always render it.
 		List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
-		if((!syncedPlayers.isEmpty() && !GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST) && MinecraftClient.getInstance().currentScreen instanceof WardrobeBrowserScreen) || GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
-			context.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
+		if(
+				(MinecraftClient.getInstance().options.playerListKey.isPressed() && !(MinecraftClient.getInstance().currentScreen instanceof WardrobeBrowserScreen)) ||
+				GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
+
+			context.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, true);
 			int yPos = 18;
 			for(PlayerListEntry entry : syncedPlayers) {
 				PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
 				context.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
 				yPos += 10;
 			}
+
 		}
 	}
 	/**
@@ -232,7 +238,7 @@ public final class WildfireEventHandler {
 	}
 
 
-	private static List<PlayerListEntry> collectPlayerEntries() {
+	public static List<PlayerListEntry> collectPlayerEntries() {
 		if(MinecraftClient.getInstance().player == null) return new ArrayList<PlayerListEntry>();
 		ClientPlayerEntity player = MinecraftClient.getInstance().player;
 		return player.networkHandler.getListedPlayerListEntries().stream()

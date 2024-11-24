@@ -23,6 +23,7 @@ import com.wildfire.main.Gender;
 import com.wildfire.main.WildfireGender;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.wildfire.gui.WildfireButton;
 import com.wildfire.main.WildfireLocalization;
@@ -33,9 +34,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.tooltip.TooltipState;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.realms.dto.PlayerInfo;
 import net.minecraft.client.render.RenderLayer;
@@ -48,6 +51,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Nullables;
 import net.minecraft.world.GameMode;
 
+import static com.wildfire.main.WildfireEventHandler.collectPlayerEntries;
+
 @Environment(EnvType.CLIENT)
 public class WardrobeBrowserScreen extends BaseWildfireScreen {
 	private static final Identifier BACKGROUND_MALE = Identifier.of(WildfireGender.MODID, "textures/gui/wardrobe_bg_male.png");
@@ -58,6 +63,8 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 	private static final Identifier CLOUD_ICON = Identifier.of(WildfireGender.MODID, "textures/cloud.png");
 
 	private static final boolean isBreastCancerAwarenessMonth = Calendar.getInstance().get(Calendar.MONTH) == Calendar.OCTOBER;
+
+	private final TooltipState contribTooltip = new TooltipState();
 
 	private WildfireButton btnMale, btnFemale, btnOther, btnCharacterPersonalization, btnAlwaysShowList;
 	public WardrobeBrowserScreen(Screen parent, UUID uuid) {
@@ -167,22 +174,43 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 		ctx.drawText(textRenderer, getTitle(), x - textRenderer.getWidth(getTitle()) / 2, y - 82, 0xFFFFFF, false);
 
 		if(client != null && client.player != null) {
-			boolean withCreator = client.player.networkHandler.getPlayerList().stream()
-					.anyMatch((player) -> player.getProfile().getId().equals(WildfireGender.CREATOR_UUID));
-			boolean withContributor = client.player.networkHandler.getPlayerList().stream()
-					.anyMatch(player -> WildfireGender.CONTRIBUTOR_UUIDS.contains(player.getProfile().getId()));
+			boolean withCreator = client.player.networkHandler.getPlayerList().stream().anyMatch((player) -> player.getProfile().getId().equals(WildfireGender.CREATOR_UUID));
+
+			List<PlayerListEntry> foundContributors = client.player.networkHandler.getPlayerList().stream()
+					.filter(player -> WildfireGender.CONTRIBUTOR_UUIDS.contains(player.getProfile().getId()))
+					.toList();
 
 			int creatorY = y + 65;
 
 			// move down so we don't overlap with the breast cancer awareness month banner
 			if(isBreastCancerAwarenessMonth) creatorY += 30;
 
-			if(withCreator && withContributor) { //with both the creator and a contributor
+			if(withCreator && foundContributors.size() != 0) { //with both the creator and a contributor
 				GuiUtils.drawCenteredTextWrapped(ctx, this.textRenderer, Text.translatable("wildfire_gender.label.with_both"), this.width / 2, creatorY, 250, 0xFF00FF);
+				int width = textRenderer.getWidth(Text.translatable("wildfire_gender.label.with_contributor"));
+
+				String contributors = foundContributors.stream()
+						.map(entry -> entry.getProfile().getName())
+						.collect(Collectors.joining(", "));
+				contributors = "WildfireFGM, " + contributors;
+				if(mouseX > this.width / 2 - width / 2 && mouseX < this.width / 2 + width / 2 && mouseY > creatorY - 2 && mouseY < creatorY + 9) {
+					contribTooltip.setTooltip(Tooltip.of(Text.literal(contributors)));
+					contribTooltip.render(true, true, ScreenRect.empty());
+				}
 			} else if(withCreator) { //only with the creator
 				GuiUtils.drawCenteredText(ctx, this.textRenderer, Text.translatable("wildfire_gender.label.with_creator"), this.width / 2, creatorY, 0xFF00FF);
-			} else if(withContributor) { //only with a contributor
+			} else if(!foundContributors.isEmpty()) { //only with a contributor
+				int width = textRenderer.getWidth(Text.translatable("wildfire_gender.label.with_contributor"));
 				GuiUtils.drawCenteredText(ctx, this.textRenderer, Text.translatable("wildfire_gender.label.with_contributor"), this.width / 2, creatorY, 0xFF00FF);
+
+				String contributors = foundContributors.stream()
+						.map(entry -> entry.getProfile().getName())
+						.collect(Collectors.joining(", "));
+
+				if(mouseX > this.width / 2 - width / 2 && mouseX < this.width / 2 + width / 2 && mouseY > creatorY - 2 && mouseY < creatorY + 9) {
+					contribTooltip.setTooltip(Tooltip.of(Text.literal(contributors)));
+					contribTooltip.render(true, true, ScreenRect.empty());
+				}
 			}
 
 		}
@@ -192,6 +220,18 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 			ctx.fill(x - 159, bcaY + 106, x + 159, bcaY + 136, 0x55000000);
 			ctx.drawTextWithShadow(textRenderer, Text.translatable("wildfire_gender.cancer_awareness.title").formatted(Formatting.BOLD, Formatting.ITALIC), this.width / 2 - 148, bcaY + 117, 0xFFFFFF);
 			ctx.drawTexture(RenderLayer::getGuiTextured, TXTR_RIBBON, x + 130, bcaY + 109, 0, 0, 26, 26, 20, 20, 20, 20);
+		}
+
+		//Render in front of the UI when it's open.
+		List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
+		if(!syncedPlayers.isEmpty() || GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
+			ctx.drawText(textRenderer, Text.translatable("wildfire_gender.wardrobe.players_using_mod").formatted(Formatting.AQUA), 5, 5, 0xFFFFFF, false);
+			int yPos = 18;
+			for(PlayerListEntry entry : syncedPlayers) {
+				PlayerConfig cfg = WildfireGender.getPlayerById(entry.getProfile().getId());
+				ctx.drawText(textRenderer, Text.literal(entry.getProfile().getName() + " - ").append(cfg.getGender().getDisplayName()), 10, yPos, 0xFFFFFF, false);
+				yPos += 10;
+			}
 		}
 	}
 
