@@ -31,6 +31,7 @@ import com.wildfire.main.WildfireLocalization;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.WildfireHelper;
 import com.wildfire.main.config.GlobalConfig;
+import com.wildfire.main.config.enums.SyncVerbosity;
 import com.wildfire.main.entitydata.PlayerConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -295,9 +296,7 @@ public final class CloudSync {
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 
-			if(SyncLog.VERBOSITY_LEVEL == 2) {
-				SyncLog.add(WildfireLocalization.SYNC_LOG_GET_SINGLE_PROFILE);
-			}
+			SyncLog.add(WildfireLocalization.SYNC_LOG_GET_SINGLE_PROFILE, SyncVerbosity.SHOW_FETCHES);
 
 			var data = GSON.fromJson(response.body(), JsonObject.class);
 			FETCH_CACHE.put(uuid, Optional.of(data));
@@ -336,9 +335,7 @@ public final class CloudSync {
 				throw new RuntimeException("Server responded " + response.statusCode() + ": " + response.body());
 			}
 
-			if(SyncLog.VERBOSITY_LEVEL == 2) {
-				SyncLog.add(WildfireLocalization.SYNC_LOG_GET_MULTIPLE_PROFILES);
-			}
+			SyncLog.add(WildfireLocalization.SYNC_LOG_GET_MULTIPLE_PROFILES, SyncVerbosity.SHOW_FETCHES);
 			var data = GSON.fromJson(response.body(), BulkFetch.class).users();
 			uuids.forEach(uuid -> FETCH_CACHE.put(uuid, Optional.ofNullable(data.get(uuid))));
 			return data;

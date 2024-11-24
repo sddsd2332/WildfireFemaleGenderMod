@@ -16,23 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package com.wildfire.main.config;
+package com.wildfire.main.config.enums;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.wildfire.main.Gender;
+import net.minecraft.util.function.ValueLists;
 
-public class GenderConfigKey extends EnumConfigKey<Gender> {
-    public GenderConfigKey(String key) {
-        super(key, Gender.MALE, Gender.BY_ID);
-    }
+import java.util.function.IntFunction;
 
-    @Override
-    protected Gender read(JsonElement element) {
-        // TODO is this still necessary? only extraordinarily old configs should still have this as a boolean
-        if(element instanceof JsonPrimitive primitive && primitive.isBoolean()) {
-            return primitive.getAsBoolean() ? Gender.MALE : Gender.FEMALE;
-        }
-        return super.read(element);
-    }
+public enum SyncVerbosity {
+	DEFAULT,
+	SHOW_FETCHES;
+
+	public static final IntFunction<SyncVerbosity> BY_ID = ValueLists.createIdToValueFunction(SyncVerbosity::ordinal, values(), ValueLists.OutOfBoundsHandling.CLAMP);
 }

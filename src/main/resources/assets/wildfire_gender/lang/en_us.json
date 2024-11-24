@@ -12,7 +12,14 @@
 	"wildfire_gender.player_list.breast_momentum": "Breast Momentum: %s%%",
 	"wildfire_gender.player_list.female_sounds": "Female Sounds: %s",
 	"wildfire_gender.wardrobe.players_using_mod": "Players Using the Mod:",
-	"wildfire_gender.always_show_list": "Always Show List: %s",
+
+	"wildfire_gender.always_show_list": "Show Synced Players: %s",
+	"wildfire_gender.always_show_list.mod_ui_only": "This screen",
+	"wildfire_gender.always_show_list.mod_ui_only.tooltip": "The synced player list will only show while in this menu",
+	"wildfire_gender.always_show_list.tab_list_open": "Player list",
+	"wildfire_gender.always_show_list.tab_list_open.tooltip": "The synced player list will show while in this menu or by pressing %s",
+	"wildfire_gender.always_show_list.always": "Always",
+	"wildfire_gender.always_show_list.always.tooltip": "The synced player list will always show",
 
 	"wildfire_gender.wardrobe.title": "Wildfire's Female Gender Mod",
 	"wildfire_gender.breast_customization.tab_customization": "Customization",
