@@ -68,7 +68,7 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 	    int y = this.height / 2;
 		PlayerConfig plr = Objects.requireNonNull(getPlayer(), "getPlayer()");
 
-		this.addDrawableChild(btnFemale = new WildfireButton(this.width / 2 - 128, this.height / 2 + 35, 80, 15, plr.getGender().getDisplayName(), button -> {
+		this.addDrawableChild(btnFemale = new WildfireButton(this.width / 2 - 130, this.height / 2 + 33, 80, 15, plr.getGender().getDisplayName(), button -> {
 			Gender gender = switch (plr.getGender()) {
 				case MALE -> Gender.FEMALE;
 				case FEMALE -> Gender.OTHER;
@@ -81,16 +81,17 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 			}
 		}));
 
-		this.addDrawableChild(this.btnCharacterPersonalization = new WildfireButton(this.width / 2 - 34, this.height / 2 - 51, 158, 20, Text.translatable("wildfire_gender.appearance_settings.title").append("..."),
+		this.addDrawableChild(this.btnCharacterPersonalization = new WildfireButton(this.width / 2 - 36, this.height / 2 - 53, 158, 20, Text.translatable("wildfire_gender.appearance_settings.title").append("..."),
 				button -> client.setScreen(new WildfireBreastCustomizationScreen(WardrobeBrowserScreen.this, this.playerUUID))));
 
 		this.btnCharacterPersonalization.active = plr.getGender().canHaveBreasts();
-		/*this.addDrawableChild(new WildfireButton(this.width / 2 - 42, y - (plr.getGender().canHaveBreasts() ? 12 : 32), 158, 20, Text.translatable("wildfire_gender.char_settings.title").append("..."),
-				button -> client.setScreen(new WildfireCharacterSettingsScreen(WardrobeBrowserScreen.this, this.playerUUID))));*/
+
+		this.addDrawableChild(new WildfireButton(this.width / 2 - 42, y - (plr.getGender().canHaveBreasts() ? 12 : 32), 158, 20, Text.translatable("wildfire_gender.char_settings.title").append("..."),
+				button -> client.setScreen(new WildfireCharacterSettingsScreen(WardrobeBrowserScreen.this, this.playerUUID))));
 
 		//noinspection ExtractMethodRecommender
 		var cloud = new WildfireButton(
-				this.width / 2 - 34, y + 32, 24, 18, Text.translatable("wildfire_gender.cloud_settings"),
+				this.width / 2 - 36, y + 30, 24, 18, Text.translatable("wildfire_gender.cloud_settings"),
 				button -> client.setScreen(new WildfireCloudSyncScreen(this, this.playerUUID))
 		) {
 			@Override
@@ -130,11 +131,11 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 			case Gender.OTHER -> BACKGROUND_OTHER;
 		};
 
-		ctx.drawTexture(RenderLayer::getGuiTextured, backgroundTexture, (this.width - 268) / 2, (this.height - 114) / 2, 0, 0, 268, 114, 512, 512);
+		ctx.drawTexture(RenderLayer::getGuiTextured, backgroundTexture, (this.width - 272) / 2, (this.height - 118) / 2, 0, 0, 268, 114, 512, 512);
 
 		if(client != null && client.world != null) {
-			int xP = this.width / 2 - 88;
-			int yP = this.height / 2 + 20;
+			int xP = this.width / 2 - 90;
+			int yP = this.height / 2 + 18;
 			PlayerEntity ent = client.world.getPlayerByUuid(this.playerUUID);
 			if(ent != null) {
 				ctx.enableScissor(xP - 34, yP - 97, xP + 35, yP + 9);
