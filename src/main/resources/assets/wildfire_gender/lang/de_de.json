@@ -7,7 +7,7 @@
 	"wildfire_gender.player_list.settings_button": "Einstellungen",
 	"wildfire_gender.player_list.sync_status": "Synchronisier Status",
 	"wildfire_gender.player_list.state.loading": "Daten laden...",
-	"wildfire_gender.player_list.state.synced": "Synchronisirte Spieler",
+	"wildfire_gender.player_list.state.synced": "Synchronisierte Spieler",
 	"wildfire_gender.player_list.bounce_multiplier": "Bounce Multiplikator: %sx",
 	"wildfire_gender.player_list.breast_momentum": "Brust Momentum: %s%%",
 	"wildfire_gender.player_list.female_sounds": "Weibliche Geräusche: %s",
@@ -16,7 +16,7 @@
 	"wildfire_gender.always_show_list": "Zeige Synchronisierte Spieler: %s",
 	"wildfire_gender.always_show_list.mod_ui_only": "In diesem Fenster",
 	"wildfire_gender.always_show_list.mod_ui_only.tooltip": "Die Liste der Synchronisierten Spieler wir nur in diesem Fenster gezeigt",
-	"wildfire_gender.always_show_list.tab_list_open": "In der Spielerliste",
+	"wildfire_gender.always_show_list.tab_list_open": "Mit der Spielerliste",
 	"wildfire_gender.always_show_list.tab_list_open.tooltip": "Die Liste der Synchronisierten Spieler wird gezeigt wenn du in diesem Fenster bist oder wenn du im Spiel %s drückst",
 	"wildfire_gender.always_show_list.always": "Immer",
 	"wildfire_gender.always_show_list.always.tooltip": "Die Liste der Synchronisierten Spieler wird immer gezeigt",
@@ -42,7 +42,7 @@
 
 	"wildfire_gender.char_settings.override_armor_physics": "Rüstungs Physik: %s",
 	"wildfire_gender.tooltip.override_armor_physics.line1": "Brustphysik wird nicht mehr durch Rüstung reduziert/gestoppt, wenn es aktiviert ist.",
-	"wildfire_gender.tooltip.override_armor_physics.line2": "Dies ist hauptsächlich da für Resource Packs die Rüstungen (oder ähnliches) entfernen",
+	"wildfire_gender.tooltip.override_armor_physics.line2": "Dies ist hauptsächlich da für Resource Packs die Rüstungen entfernen oder verringern",
 
 	"wildfire_gender.char_settings.hide_in_armor": "In Rüstung verstecken: %s",
 	"wildfire_gender.char_settings.hurt_sounds": "Weibliche Verletzungsgeräusche: %s",
@@ -99,10 +99,10 @@
 	"wildfire_gender.sync_log.authentication_failed": "Überprüfe fehlgeschlagen.",
 	"wildfire_gender.sync_log.reauthenticating": "Überprüfe Account erneut...",
 
-	"wildfire_gender.sync_log.failed_to_sync_data": "Daten können nicht synchronisiert werden.",
+	"wildfire_gender.sync_log.failed_to_sync_data": "Daten konnten nicht synchronisiert werden.",
 	"wildfire_gender.sync_log.sync_to_cloud": "Synchronisiere Daten zu Cloud...",
 	"wildfire_gender.sync_log.attempting_sync": "Synchronisiere Profil...",
-	"wildfire_gender.sync_log.sync_success": "Synchronisiere erfolgreich.",
+	"wildfire_gender.sync_log.sync_success": "Synchronisierung erfolgreich.",
 	"wildfire_gender.sync_log.sync_too_frequently": "Synchronisierrate begrenzt.",
 
 	"wildfire_gender.sync_log.get_single_profile": "Abrufen von Profil...",
@@ -111,5 +111,5 @@
 	"wildfire_gender.details.next_page": "Nächste Seite",
 	"wildfire_gender.details.prev_page": "Vorherige Seite",
 
-	"wildfire_gender.cloud_details.title": "Cloud Synchronizierungserver Information"
+	"wildfire_gender.cloud_details.title": "Cloud Synchronizierungsserver Information"
 }
