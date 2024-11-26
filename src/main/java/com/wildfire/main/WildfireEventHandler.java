@@ -35,6 +35,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -57,9 +58,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import org.lwjgl.glfw.GLFW;
@@ -109,8 +117,17 @@ public final class WildfireEventHandler {
 		ClientPlayConnectionEvents.DISCONNECT.register(WildfireEventHandler::clientDisconnect);
 		LivingEntityFeatureRendererRegistrationCallback.EVENT.register(WildfireEventHandler::registerRenderLayers);
 		HudRenderCallback.EVENT.register(WildfireEventHandler::renderHud);
+		//ItemTooltipCallback.EVENT.register(WildfireEventHandler::renderTooltip); disabled for now
 	}
 
+	@Environment(EnvType.CLIENT)
+	private static void renderTooltip(ItemStack stack, Item.TooltipContext tooltipContext, TooltipType type, List<Text> lines) {
+		if (stack.getItem() == Items.LEATHER_CHESTPLATE) {
+
+			lines.add(1, Text.literal("+1 Breast Support")
+					.formatted(Formatting.AQUA));
+		}
+	}
 	@Environment(EnvType.CLIENT)
 	private static void renderHud(DrawContext context, RenderTickCounter tickCounter) {
 		var textRenderer = Objects.requireNonNull(MinecraftClient.getInstance().textRenderer, "textRenderer");
