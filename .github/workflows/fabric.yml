@@ -3,7 +3,7 @@ on:
   push:
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -12,11 +12,12 @@ jobs:
     - name: Extract build version information
       id: ref
       run: .github/extract_refs.sh
-    - name: Setup JDK
+    - name: Setup JDK 21
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: 21
+        check-latest: true
     - name: Initialize caches
       uses: actions/cache@v4
       with:
@@ -27,7 +28,7 @@ jobs:
         key: ${{ runner.os }}-build-fabric-${{ steps.ref.outputs.minecraft_version }}
         restore-keys: |
           ${{ runner.os }}-build-fabric-
-    - name: Compile
+    - name: Compile with Grade
       run: ./gradlew build
     - name: Upload compiled artifacts
       uses: actions/upload-artifact@v4

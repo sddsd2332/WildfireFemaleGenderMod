@@ -30,7 +30,7 @@ dependencies {
 
 	// Allow logging into an actual Minecraft account in a dev env
 	// See https://github.com/DJtheRedstoner/DevAuth
-	modLocalRuntime "me.djtheredstoner:DevAuth-fabric:1.2.0"
+	modLocalRuntime "me.djtheredstoner:DevAuth-fabric:1.2.1"
 }
 
 processResources {
