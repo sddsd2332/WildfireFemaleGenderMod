@@ -88,7 +88,7 @@ public final class CloudSync {
 
 	private static final Queue<QueuedFetch> QUEUED = new ConcurrentLinkedDeque<>();
 	private static final Cache<UUID, Optional<JsonObject>> FETCH_CACHE = CacheBuilder.newBuilder()
-			.expireAfterAccess(Duration.ofMinutes(10)).concurrencyLevel(6).build();
+			.expireAfterWrite(Duration.ofMinutes(10)).concurrencyLevel(6).build();
 
 	private static final String DEFAULT_CLOUD_URL = "https://wfgm.celestialfault.dev";
 	private static final Duration SYNC_COOLDOWN = Duration.ofSeconds(10);
