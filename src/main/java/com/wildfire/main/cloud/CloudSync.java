@@ -287,7 +287,7 @@ public final class CloudSync {
 			var url = URI.create(getCloudServer() + "/" + uuid);
 			var request = createRequest(url).GET().build();
 			var response = CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()).join();
-			if(response.statusCode() == 404) {
+			if(response.statusCode() == 404 || response.statusCode() == 204) {
 				WildfireGender.LOGGER.debug("Server replied no data for {}", uuid);
 				FETCH_CACHE.put(uuid, Optional.empty());
 				return null;
