@@ -107,7 +107,6 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 		/*this.addDrawableChild(new WildfireButton(this.width / 2 - 42, y - (plr.getGender().canHaveBreasts() ? 12 : 32), 158, 20, Text.translatable("wildfire_gender.char_settings.title").append("..."),
 				button -> client.setScreen(new WildfireCharacterSettingsScreen(WardrobeBrowserScreen.this, this.playerUUID))));*/
 
-		//noinspection ExtractMethodRecommender
 		var cloud = new WildfireButton(
 				this.width / 2 - 36, y + 30, 24, 18, Text.translatable("wildfire_gender.cloud_settings"),
 				button -> client.setScreen(new WildfireCloudSyncScreen(this, this.playerUUID))
@@ -118,13 +117,13 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 			}
 		};
 
-		if(!CloudSync.isAvailable()) {
-			cloud.setTooltip(Tooltip.of(Text.translatable("wildfire_gender.cloud.unavailable_offline")));
+		var cloudUnavailable = CloudSync.unavailableReason();
+		if(cloudUnavailable != null) {
+			cloud.setTooltip(Tooltip.of(cloudUnavailable.text()));
 			cloud.setActive(false);
 		} else {
-			cloud.setTooltip(Tooltip.of(Text.translatable("wildfire_gender.cloud.available_online")));
+			cloud.setTooltip(Tooltip.of(Text.translatable("wildfire_gender.cloud.tooltip")));
 		}
-
 		this.addDrawableChild(cloud);
 
 		/*this.addDrawableChild(new WildfireButton(this.width / 2 + 111, y - 63, 9, 9, Text.literal("X"),

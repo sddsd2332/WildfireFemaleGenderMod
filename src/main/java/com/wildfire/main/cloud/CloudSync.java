@@ -110,10 +110,25 @@ public final class CloudSync {
 	}
 
 	/**
-	 * @return {@code true} if syncing is available; currently, this only checks for a valid Minecraft session.
+	 * @return A {@link SyncUnavailable} enum indicating the reason for syncing being unavailable, or {@code null} if available
+	 */
+	public static @Nullable SyncUnavailable unavailableReason() {
+		if(MinecraftClient.getInstance().getSession().getAccountType() != Session.AccountType.MSA) {
+			return SyncUnavailable.INVALID_ACCOUNT;
+		}
+		var client = MinecraftClient.getInstance();
+		var netHandler = client.getNetworkHandler();
+		if(!client.isInSingleplayer() && netHandler != null && !netHandler.getConnection().isEncrypted()) {
+			return SyncUnavailable.OFFLINE_SERVER;
+		}
+		return null;
+	}
+
+	/**
+	 * @return {@code true} if syncing is available; this method is shorthand for {@code unavailableReason() == null}.
 	 */
 	public static boolean isAvailable() {
-		return MinecraftClient.getInstance().getSession().getAccountType() == Session.AccountType.MSA;
+		return unavailableReason() == null;
 	}
 
 	/**

@@ -19,11 +19,9 @@
 package com.wildfire.main;
 
 import com.wildfire.gui.GuiUtils;
-import com.wildfire.gui.screen.BaseWildfireScreen;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
 import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
 import com.wildfire.main.cloud.CloudSync;
-import com.wildfire.main.cloud.SyncLog;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
@@ -35,7 +33,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -63,7 +60,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -76,7 +72,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public final class WildfireEventHandler {
 	private WildfireEventHandler() {
@@ -142,6 +137,7 @@ public final class WildfireEventHandler {
 					.formatted(Formatting.AQUA));
 		}
 	}
+
 	@Environment(EnvType.CLIENT)
 	private static void renderHud(DrawContext context, RenderTickCounter tickCounter) {
 		var textRenderer = Objects.requireNonNull(MinecraftClient.getInstance().textRenderer, "textRenderer");
@@ -204,21 +200,7 @@ public final class WildfireEventHandler {
 
 		if(timer % 40 == 0) {
 			CloudSync.sendNextQueueBatch();
-			if(clientConfig != null && clientConfig.needsCloudSync && !(client.currentScreen instanceof BaseWildfireScreen)) {
-				if(GlobalConfig.INSTANCE.get(GlobalConfig.AUTOMATIC_CLOUD_SYNC) && !CloudSync.syncOnCooldown()) {
-					CompletableFuture.runAsync(() -> {
-						try {
-							CloudSync.sync(clientConfig).join();
-							WildfireGender.LOGGER.info("Synced player data to the cloud");
-							SyncLog.add(WildfireLocalization.SYNC_LOG_SYNC_TO_CLOUD);
-						} catch(Exception e) {
-							WildfireGender.LOGGER.error("Failed to sync player data", e);
-							SyncLog.add(WildfireLocalization.SYNC_LOG_FAILED_TO_SYNC_DATA);
-						}
-					});
-					clientConfig.needsCloudSync = false;
-				}
-			}
+			if(clientConfig != null) clientConfig.attemptCloudSync();
 		}
 
 
