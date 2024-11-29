@@ -320,7 +320,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 	}
 
 	protected static void renderBox(WildfireModelRenderer.ModelBox model, MatrixStack matrixStack, VertexConsumer vertexConsumer,
-	                                int light, int overlay, int color) {
+									int light, int overlay, int color) {
 		Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
 		Matrix3f matrix3f = matrixStack.peek().getNormalMatrix();
 		for(WildfireModelRenderer.TexturedQuad quad : model.quads) {
