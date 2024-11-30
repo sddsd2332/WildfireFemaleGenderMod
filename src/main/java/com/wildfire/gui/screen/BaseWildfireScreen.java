@@ -25,7 +25,9 @@ import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
@@ -33,6 +35,15 @@ public abstract class BaseWildfireScreen extends Screen {
 
     protected final UUID playerUUID;
     protected final Screen parent;
+
+    //Keira Emberlyn - The Mod's New Mascot
+    protected static final Identifier KEIRA_LOOK = Identifier.of(WildfireGender.MODID, "textures/gui/mascot/keira_look.png");
+    protected static final Identifier KEIRA_WAVE = Identifier.of(WildfireGender.MODID, "textures/gui/mascot/keira_wave.png");
+    protected static final Identifier KEIRA_LEATHER = Identifier.of(WildfireGender.MODID, "textures/gui/mascot/keira_leather.png");
+    protected static final Identifier KEIRA_NETHERITE = Identifier.of(WildfireGender.MODID, "textures/gui/mascot/keira_netherite.png");
+    protected static final int KEIRA_WIDTH = 610;
+    protected static final int KEIRA_HEIGHT = 736;
+    //Keira test ctx.drawTexture(RenderLayer::getGuiTextured, KEIRA_LOOK, x, y, 0, 0, 26, 26, KEIRA_WIDTH, KEIRA_HEIGHT, KEIRA_WIDTH, KEIRA_HEIGHT);
 
     protected BaseWildfireScreen(Text title, Screen parent, UUID uuid) {
         super(title);

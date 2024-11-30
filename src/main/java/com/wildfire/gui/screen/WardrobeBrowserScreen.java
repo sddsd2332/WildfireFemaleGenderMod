@@ -182,6 +182,7 @@ public class WardrobeBrowserScreen extends BaseWildfireScreen {
 		//Render in front of the UI when it's open.
 		List<PlayerListEntry> syncedPlayers = collectPlayerEntries();
 		GuiUtils.drawSyncedPlayers(ctx, textRenderer, syncedPlayers);
+
 	}
 
 	private void drawCreatorContributorText(DrawContext ctx, int mouseX, int mouseY, int creatorY) {
