@@ -37,6 +37,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Quaternionf;
 
+import java.text.Normalizer;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -146,7 +147,10 @@ public class WildfireFirstTimeSetupScreen extends BaseWildfireScreen {
 
 		GuiUtils.drawCenteredText(ctx, textRenderer, TITLE, x, y - 24, 4210752);
 
-		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, DESCRIPTION, x + 32, y - 8, (int) ((256-65)), 0xFFFFFF);
+		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, Text.literal("Keira Emberlyn:").formatted(Formatting.LIGHT_PURPLE), x + 32, y - 10, (int) ((256-65)), 0xFFFFFF);
+
+		//TODO: Vertical scroll bar for longer text?
+		GuiUtils.drawCenteredTextWrapped(ctx, textRenderer, DESCRIPTION, x + 32, y + 2, (int) ((256-65)), 0xFFFFFF);
 
 
 		mStack.push();
