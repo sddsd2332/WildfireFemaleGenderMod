@@ -1,7 +1,8 @@
 {
 	"category.wildfire_gender.generic": "Wildfire's Weibliche Geschlechts Mod",
-	"key.wildfire_gender.gender_menu": "Weibliches Geschelchts Menü",
-	"toast.wildfire_gender.get_started": "Drücke '%s' um zu starten!",
+	"key.wildfire_gender.gender_menu": "Weibliches Geschlechts Menü",
+	"key.wildfire_gender.toggle": "Brust Rendering umschalten",
+	"toast.wildfire_gender.get_started": "Drücke '%s' um loszulegen!",
 
 	"wildfire_gender.player_list.title": "Weibliche Geschlechts Mod",
 	"wildfire_gender.player_list.settings_button": "Einstellungen",
