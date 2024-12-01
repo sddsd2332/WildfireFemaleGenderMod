@@ -53,7 +53,8 @@
   },
   "conflicts": {
     "skinlayers": "*",
-    "essential": "*"
+    "essential": "*",
+    "essential-loader": "*"
   },
   "custom": {
     "modmenu": {
