@@ -19,6 +19,7 @@
 package com.wildfire.render;
 
 import com.wildfire.api.IGenderArmor;
+import com.wildfire.main.WildfireEventHandler;
 import com.wildfire.main.entitydata.Breasts;
 import com.wildfire.main.WildfireGender;
 import com.wildfire.main.WildfireHelper;
@@ -118,7 +119,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 	@Override
 	public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, S state, float limbAngle, float limbDistance) {
 		MinecraftClient client = MinecraftClient.getInstance();
-		if(client.player == null) {
+		if(client.player == null || !WildfireEventHandler.getRenderBreasts()) {
 			// we're currently in a menu; we won't have any data loaded to begin with, so just give up early
 			return;
 		}

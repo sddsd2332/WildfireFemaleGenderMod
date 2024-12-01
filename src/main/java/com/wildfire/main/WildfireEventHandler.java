@@ -54,6 +54,7 @@ import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -83,8 +84,14 @@ public final class WildfireEventHandler {
 	}
 
 	private static final KeyBinding CONFIG_KEYBIND;
+	private static final KeyBinding TOGGLE_KEYBIND;
 	private static int timer = 0;
 
+	private static boolean RENDER_BREASTS = true; //This is just a toggle to render it in game quickly, I'm not putting this in the config to be saved.
+
+	public static boolean getRenderBreasts() {
+		return RENDER_BREASTS;
+	}
 	static {
 		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			// this has to be wrapped in a lambda to ensure that a dedicated server won't crash during startup
@@ -94,8 +101,15 @@ public final class WildfireEventHandler {
 				KeyBindingHelper.registerKeyBinding(keybind);
 				return keybind;
 			});
+			TOGGLE_KEYBIND = Util.make(() -> {
+				KeyBinding keybind = new KeyBinding("key.wildfire_gender.toggle", InputUtil.UNKNOWN_KEY.getCode(), "category.wildfire_gender.generic");
+				KeyBindingHelper.registerKeyBinding(keybind);
+				return keybind;
+			});
+
 		} else {
 			CONFIG_KEYBIND = null;
+			TOGGLE_KEYBIND = null;
 		}
 	}
 
@@ -207,6 +221,10 @@ public final class WildfireEventHandler {
 			}
 		}
 
+
+		if(TOGGLE_KEYBIND.wasPressed() && client.currentScreen == null) {
+			RENDER_BREASTS ^= true;
+		}
 		if(CONFIG_KEYBIND.wasPressed() && client.currentScreen == null) {
 			if(GlobalConfig.INSTANCE.get(GlobalConfig.FIRST_TIME_LOAD) && CloudSync.isAvailable()) {
 				client.setScreen(new WildfireFirstTimeSetupScreen(null, client.player.getUuid()));
