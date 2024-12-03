@@ -31,9 +31,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(EquipmentRenderer.TrimSpriteKey.class)
 @Environment(EnvType.CLIENT)
 public interface TrimSpriteKeyConstructorAccessor {
-    // Yes, it would've been possible to simply access widener the constructor along with the record itself, but I
-    // am absolutely not willing to maintain such an access widener entry when I could alternatively use Mixin, which
-    // at least will fail in a way that's significantly less of a headache to update.
+    // While it would've been possible to also simply access widener the constructor along with the class, updating
+    // such an access widener in the event that Mojang changes this in the future is _far_ more of a headache
+    // than simply using a mixin.
     @Invoker("<init>")
     static EquipmentRenderer.TrimSpriteKey newKey(ArmorTrim armorTrim, EquipmentModel.LayerType layerType, RegistryKey<EquipmentAsset> registryKey) {
         throw new UnsupportedOperationException("Something's gone very seriously wrong if we've gotten here!");
