@@ -79,8 +79,8 @@
 
 
 "wildfire_gender.cloud_settings": "Настройки синхронизации",
-"wildfire_gender.cloud.available_online": "Облачная синхронизация",
-"wildfire_gender.cloud.unavailable_offline": "Синхронизация с облаком недоступна, так как вы не вошли в действующую учетную запись Minecraft.",
+"wildfire_gender.cloud.tooltip": "Облачная синхронизация",
+"wildfire_gender.cloud.unavailable.invalid_account": "Синхронизация с облаком недоступна, так как вы не вошли в действующую учетную запись Minecraft.",
 "wildfire_gender.cloud.status": "Облачная синхронизация: %s",
 "wildfire_gender.cloud.automatic": "Авто-синхронизация: %s",
 "wildfire_gender.cloud.automatic.tooltip.line1": "Если эта функция включена, ваша конфигурация будет автоматически синхронизироваться с облаком после внесения любых изменений.",
@@ -91,8 +91,6 @@
 
 "wildfire_gender.cloud.syncing.success": "Синхронизировано",
 "wildfire_gender.cloud.syncing.fail": "Ошибка синхронизации",
-"wildfire_gender.cloud.disclaimer.line1": "Данные сервера синхронизации могут кэшироваться не менее 30 минут.",
-"wildfire_gender.cloud.disclaimer.line2": "Если изменения не видны, попробуйте повторить синхронизацию позже.",
 
 "wildfire_gender.sync_log.authenticating": "Авторизация аккаунта...",
 "wildfire_gender.sync_log.authentication_success": "Авторизация успешна!",

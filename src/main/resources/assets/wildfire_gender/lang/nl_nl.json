@@ -92,8 +92,6 @@
 
 	"wildfire_gender.cloud.syncing.success": "Gesynchroniseerd",
 	"wildfire_gender.cloud.syncing.fail": "Synchronisatie Niet Gelukt",
-	"wildfire_gender.cloud.disclaimer.line1": "Server Sychronisatie date wordt mogelijk gecachd voor minimaal 30 minuten.",
-	"wildfire_gender.cloud.disclaimer.line2": "Als de aanpassen niet zichtbaar zijn, synchroniseer later opnieuw aub.",
 
 	"wildfire_gender.sync_log.authenticating": "Account Verifiëren...",
 	"wildfire_gender.sync_log.authentication_success": "Verificatie Gelukt.",
