@@ -16,25 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.wildfire.main.cloud;
+package com.wildfire.mixins.accessors;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.TextureManager;
+import net.minecraft.resource.ResourceManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
-
-record CloudAuth(boolean success, String token, UUID account, Instant expires) {
-	// Assume that authentication tokens have already expired if they're due to expire within 30 seconds to account
-	// for potential clock drift and network latency
-	static final Duration AUTH_INVALIDATION_ADJUSTMENT = Duration.ofSeconds(30);
-
-	boolean isExpired() {
-		return expires.minus(AUTH_INVALIDATION_ADJUSTMENT).isBefore(Instant.now());
-	}
-
-	boolean isInvalidForClientPlayer() {
-		var client = MinecraftClient.getInstance();
-		return client.player == null || !account.equals(client.player.getUuid());
-	}
+@Mixin(TextureManager.class)
+public interface TextureManagerAccessor {
+    @Accessor
+    ResourceManager getResourceContainer();
 }

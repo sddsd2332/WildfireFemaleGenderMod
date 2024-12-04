@@ -9,6 +9,9 @@
   "client": [
     "BreastPhysicsTickMixin",
     "LivingEntityMixin",
+    "accessors.EquipmentRendererAccessor",
+    "accessors.TextureManagerAccessor",
+    "accessors.TrimSpriteKeyConstructorAccessor",
     "renderstate.LivingEntityRendererMixin",
     "renderstate.LivingEntityRenderStateMixin"
   ],

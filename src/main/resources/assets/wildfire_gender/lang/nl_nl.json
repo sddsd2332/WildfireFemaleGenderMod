@@ -79,8 +79,9 @@
 
 
 	"wildfire_gender.cloud_settings": "Online Synchronisatie Instellingen",
-	"wildfire_gender.cloud.available_online": "Online Synchronisatie",
-	"wildfire_gender.cloud.unavailable_offline": "Online synchronisatie is niet beschikbaar, omdat je niet bent ingelogd in een geldig Minecraft account",
+	"wildfire_gender.cloud.tooltip": "Online Synchronisatie",
+	"wildfire_gender.cloud.unavailable.invalid_account": "Online synchronisatie is niet beschikbaar, omdat je niet bent ingelogd in een geldig Minecraft account",
+	"wildfire_gender.cloud.unavailable.offline_server": "Online synchronisatie is niet beschikbaar, want de server waar mee je bent verbondenis in offlinemodus",
 	"wildfire_gender.cloud.status": "Synchroniseren: %s",
 	"wildfire_gender.cloud.automatic": "Automatische Synchronisatie: %s",
 	"wildfire_gender.cloud.automatic.tooltip.line1": "Wanner dit aanstaat, jouw configuratie wordt automatisch online gesynchroniseerd na dat je aanpassingen maakt.",
@@ -92,8 +93,6 @@
 
 	"wildfire_gender.cloud.syncing.success": "Gesynchroniseerd",
 	"wildfire_gender.cloud.syncing.fail": "Synchronisatie Niet Gelukt",
-	"wildfire_gender.cloud.disclaimer.line1": "Server Sychronisatie date wordt mogelijk gecachd voor minimaal 30 minuten.",
-	"wildfire_gender.cloud.disclaimer.line2": "Als de aanpassen niet zichtbaar zijn, synchroniseer later opnieuw aub.",
 
 	"wildfire_gender.sync_log.authenticating": "Account Verifiëren...",
 	"wildfire_gender.sync_log.authentication_success": "Verificatie Gelukt.",
