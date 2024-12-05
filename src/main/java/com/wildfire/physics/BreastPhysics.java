@@ -210,7 +210,7 @@ public class BreastPhysics {
 		this.targetRotVel = calcRotation(entity, bounceIntensity);
 		this.targetRotVel += (float) motion.y * bounceIntensity * randomB;
 
-		this.targetBounceX = calcRotation(entity, bounceIntensity) / 10f;
+		this.targetBounceX = -calcRotation(entity, bounceIntensity) / 10f;
 
 		float f2 = (float) entity.getVelocity().lengthSquared() / 0.2F;
 		f2 = f2 * f2 * f2;
