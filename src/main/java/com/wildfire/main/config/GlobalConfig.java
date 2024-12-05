@@ -28,6 +28,9 @@ public class GlobalConfig extends AbstractConfiguration {
         super(".", "wildfire_gender");
     }
 
+    // note: this option is not intended to be saved in any persistent manner
+    public static boolean RENDER_BREASTS = true;
+
     public static final BooleanConfigKey FIRST_TIME_LOAD = new BooleanConfigKey("firstTimeLoad", true);
     public static final BooleanConfigKey CLOUD_SYNC_ENABLED = new BooleanConfigKey("cloud_sync", false);
     public static final BooleanConfigKey AUTOMATIC_CLOUD_SYNC = new BooleanConfigKey("sync_player_data", false);
