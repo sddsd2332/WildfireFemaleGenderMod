@@ -41,7 +41,7 @@ public class GlobalConfig extends AbstractConfiguration {
     public static final EnumConfigKey<ShowPlayerListMode> ALWAYS_SHOW_LIST = new EnumConfigKey<>("alwaysShowList", ShowPlayerListMode.MOD_UI_ONLY, ShowPlayerListMode.BY_ID);
 
     // TODO enable by default? add a ui option?
-    public static final BooleanConfigKey ARMOR_STAT = new BooleanConfigKey("armor_stat", false);
+    public static final BooleanConfigKey ARMOR_STAT = new BooleanConfigKey("armor_stat", true);
 
     static {
         INSTANCE.setDefault(FIRST_TIME_LOAD);

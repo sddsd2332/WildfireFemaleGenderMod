@@ -48,6 +48,7 @@
 	"wildfire_gender.tooltip.override_armor_physics.line2": "This is intended for use with resource packs that hide armor, or any similar minimal armor packs",
 
 	"wildfire_gender.char_settings.hide_in_armor": "Hide In Armor: %s",
+	"wildfire_gender.char_settings.show_armor_stat": "Show Armor Tooltip: %s",
 	"wildfire_gender.char_settings.hurt_sounds": "Female Hurt Sounds: %s",
 	"wildfire_gender.tooltip.hurt_sounds": "Your character will play a female hurt sound when taking damage if your gender is set to either Female or Other",
 
