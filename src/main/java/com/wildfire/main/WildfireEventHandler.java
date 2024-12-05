@@ -145,6 +145,14 @@ public final class WildfireEventHandler {
 			return;
 		}
 
+		/*if(MinecraftClient.getInstance().player != null) {
+			PlayerConfig pCfg = WildfireGender.getPlayerById(MinecraftClient.getInstance().player.getUuid());
+			if(pCfg != null) {
+				context.drawText(textRenderer, "Physics Debug", 5, 5, 0xFFFFFF, true);
+				context.drawText(textRenderer, "Position: " + pCfg.getLeftBreastPhysics().getPositionX() + "," + pCfg.getLeftBreastPhysics().getPositionY(), 5, 15, 0xFFFFFF, true);
+				context.drawText(textRenderer, "Breast Size: " + pCfg.getLeftBreastPhysics().getBreastSize(tickCounter.getTickDelta(false)), 5, 35, 0xFFFFFF, true);
+			}
+		}*/
 		boolean shouldShow = switch(GlobalConfig.INSTANCE.get(GlobalConfig.ALWAYS_SHOW_LIST)) {
 			case MOD_UI_ONLY -> false;
 			case TAB_LIST_OPEN -> MinecraftClient.getInstance().options.playerListKey.isPressed();
