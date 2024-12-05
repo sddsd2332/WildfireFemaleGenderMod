@@ -1,20 +1,20 @@
 /*
-    Wildfire's Female Gender Mod is a female gender mod created for Minecraft.
-    Copyright (C) 2023 WildfireRomeo
-
-    This program is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Wildfire's Female Gender Mod is a female gender mod created for Minecraft.
+ * Copyright (C) 2023-present WildfireRomeo
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 package com.wildfire.physics;
 
@@ -52,7 +52,7 @@ public class BreastPhysics {
 
 	private final EntityConfig entityConfig;
 	private int randomB = 1;
-	private boolean alreadyFalling = false;
+	private double lastVerticalMoveVelocity;
 
 	public BreastPhysics(EntityConfig entityConfig) {
 		this.entityConfig = entityConfig;
@@ -65,12 +65,12 @@ public class BreastPhysics {
 				// as the chicken (which is likely intended only for baby zombies), this results in unintended
 				// behavior with what we're doing
 				vehicle instanceof ChickenEntity
-				// unsaddled horses (and llamas, which also extend AbstractDonkeyEntity?) also break rotation
-				// physics, despite acting similarly to other entities where the rider's body yaw is allowed to
-				// (somewhat) freely move around
-				|| vehicle instanceof AbstractHorseEntity horseLike && !horseLike.isSaddled()
-				// camels also suffer from largely the same issue as unsaddled horses when sitting or standing up
-				|| vehicle instanceof CamelEntity camel && camel.isStationary();
+						// unsaddled horses (and llamas, which also extend AbstractDonkeyEntity?) also break rotation
+						// physics, despite acting similarly to other entities where the rider's body yaw is allowed to
+						// (somewhat) freely move around
+						|| vehicle instanceof AbstractHorseEntity horseLike && !horseLike.isSaddled()
+						// camels also suffer from largely the same issue as unsaddled horses when sitting or standing up
+						|| vehicle instanceof CamelEntity camel && camel.isStationary();
 	}
 
 	private static boolean shouldUseVehicleYaw(LivingEntity rider, Entity vehicle) {
@@ -114,7 +114,7 @@ public class BreastPhysics {
 				}
 				this.preBreastSize = this.breastSize;
 			} else {
-				this.breastSize = 0f;
+				this.preBreastSize = this.breastSize = 0f;
 			}
 			return;
 		}
@@ -194,12 +194,14 @@ public class BreastPhysics {
 		if(!entityConfig.getBreasts().isUniboob()) {
 			bounceIntensity = bounceIntensity * WildfireHelper.randFloat(0.5f, 1.5f);
 		}
-		if(entity.fallDistance > 0 && !alreadyFalling) {
-			randomB = entity.getWorld().random.nextBoolean() ? -1 : 1;
-			alreadyFalling = true;
-		}
-		if(entity.fallDistance == 0) alreadyFalling = false;
 
+		double vertVelocity = entity.getVelocity().y;
+		// Randomize which side the breast will angle toward when the player jumps/has upward velocity applied to them,
+		// or stops falling
+		if((lastVerticalMoveVelocity <= 0 && vertVelocity > 0) || (lastVerticalMoveVelocity < 0 && vertVelocity == 0)) {
+			randomB = entity.getWorld().random.nextBoolean() ? -1 : 1;
+		}
+		lastVerticalMoveVelocity = vertVelocity;
 
 		this.targetBounceY = (float) motion.y * bounceIntensity;
 		this.targetBounceY += breastWeight;
@@ -207,6 +209,8 @@ public class BreastPhysics {
 
 		this.targetRotVel = calcRotation(entity, bounceIntensity);
 		this.targetRotVel += (float) motion.y * bounceIntensity * randomB;
+
+		this.targetBounceX = -calcRotation(entity, bounceIntensity) / 15f;
 
 		float f2 = (float) entity.getVelocity().lengthSquared() / 0.2F;
 		f2 = f2 * f2 * f2;
@@ -240,7 +244,7 @@ public class BreastPhysics {
 					this.targetBounceY = (Math.random() > 0.5 ? -bounceIntensity : bounceIntensity) / 6f;
 					this.targetBounceY += breastWeight;
 				}
-			} else if(entity.getVehicle() instanceof HorseEntity horse) {
+			} else if(entity.getVehicle() instanceof AbstractHorseEntity horse) {
 				float movement = (float) horse.getVelocity().lengthSquared();
 				if(horse.age % clampMovement(movement) == 5 && movement > 0.05f) {
 					this.targetBounceY = bounceIntensity / 4f;

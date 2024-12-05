@@ -123,6 +123,7 @@ public class GenderLayer<T extends LivingEntity, M extends BipedEntityModel<T>> 
 	 */
 	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 	protected boolean setupRender(T entity, EntityConfig entityConfig, float partialTicks) {
+
 		armorStack = entity.getEquippedStack(EquipmentSlot.CHEST);
 		//Note: When the stack is empty the helper will fall back to an implementation that returns the proper data
 		genderArmor = WildfireHelper.getArmorConfig(armorStack);
@@ -130,12 +131,6 @@ public class GenderLayer<T extends LivingEntity, M extends BipedEntityModel<T>> 
 		if(genderArmor.alwaysHidesBreasts() || !entityConfig.showBreastsInArmor() && isChestplateOccupied) {
 			//If the armor always hides breasts or there is armor and the player configured breasts
 			// to be hidden when wearing armor, we can just exit early rather than doing any calculations
-			return false;
-		}
-
-		RenderLayer type = getRenderLayer(entity);
-		if(type == null && !isChestplateOccupied) {
-			// the entity is invisible and doesn't have a chestplate equipped
 			return false;
 		}
 
@@ -164,13 +159,19 @@ public class GenderLayer<T extends LivingEntity, M extends BipedEntityModel<T>> 
 			rPhysPositionX = MathHelper.lerp(partialTicks, rightBreastPhysics.getPrePositionX(), rightBreastPhysics.getPositionX());
 			rPhysBounceRotation = MathHelper.lerp(partialTicks, rightBreastPhysics.getPreBounceRotation(), rightBreastPhysics.getBounceRotation());
 		}
-		breastSize = bSize * 1.5f;
-		if(breastSize > 0.7f) breastSize = 0.7f;
-		if(bSize > 0.7f) breastSize = bSize;
-		if(breastSize < 0.02f) return false;
 
-		zOffset = 0.0625f - (bSize * 0.0625f);
-		breastSize = bSize + 0.5f * Math.abs(bSize - 0.7f) * 2f;
+		breastSize = Math.min(bSize * 1.5f, 0.7f); // Limit the max size to 0.7f
+
+		if (bSize > 0.7f) {
+			breastSize = bSize; // If bSize exceeds 0.7f, use bSize
+		}
+
+		if (breastSize < 0.02f) {
+			return false; // Return false if breastSize is too small
+		}
+
+		zOffset = 0.0625f - (bSize * 0.0625f); // Calculate zOffset
+		breastSize += 0.5f * Math.abs(bSize - 0.7f) * 2f; // Adjust breastSize based on bSize
 
 		float resistance = MathHelper.clamp(genderArmor.physicsResistance(), 0, 1);
 		//Note: We only check if the breathing animation should be enabled if the chestplate's physics resistance
@@ -204,14 +205,8 @@ public class GenderLayer<T extends LivingEntity, M extends BipedEntityModel<T>> 
 
 		ModelPart body = model.body;
 		matrixStack.translate(body.pivotX * 0.0625f, body.pivotY * 0.0625f, body.pivotZ * 0.0625f);
-		if(body.roll != 0.0F) {
-			matrixStack.multiply(new Quaternionf().rotationXYZ(0f, 0f, body.roll));
-		}
-		if(body.yaw != 0.0F) {
-			matrixStack.multiply(new Quaternionf().rotationXYZ(0f, body.yaw, 0f));
-		}
-		if(body.pitch != 0.0F) {
-			matrixStack.multiply(new Quaternionf().rotationXYZ(body.pitch, 0f, 0f));
+		if(body.roll != 0.0F || body.yaw != 0.0F || body.pitch != 0.0F) {
+			matrixStack.multiply(new Quaternionf().rotationZYX(body.roll, body.yaw, body.pitch));
 		}
 
 		if(bounceEnabled) {
@@ -231,32 +226,29 @@ public class GenderLayer<T extends LivingEntity, M extends BipedEntityModel<T>> 
 			matrixStack.translate(0.0625f * 2 * (side.isLeft ? 1 : -1), 0, 0);
 		}
 
-		float rotationMultiplier = 0;
+		float rotation = breastSize;
 		if(bounceEnabled) {
 			matrixStack.translate(0, -0.035f * breastSize, 0); //shift down to correct position
-			rotationMultiplier = -(side.isLeft ? lPhysPositionY : rPhysPositionY) / 12f;
+			rotation -= (side.isLeft ? lPhysPositionY : rPhysPositionY) / 12f;
 		}
-		float totalRotation = breastSize + rotationMultiplier;
-		if(!bounceEnabled) {
-			totalRotation = breastSize;
-		}
-		if(totalRotation > breastSize + 0.2F) {
-			totalRotation = breastSize + 0.2F;
-		}
-		totalRotation = Math.min(totalRotation, 1); //hard limit for MAX
+
+		rotation = Math.min(rotation, breastSize + 0.2f);
+		rotation = Math.min(rotation, 1); //hard limit for MAX
 
 		if(isChestplateOccupied) {
 			matrixStack.translate(0, 0, 0.01f);
 		}
 
-		matrixStack.multiply(new Quaternionf().rotationXYZ(0, (float)((side.isLeft ? outwardAngle : -outwardAngle) * (Math.PI / 180f)), 0));
-		matrixStack.multiply(new Quaternionf().rotationXYZ((float)(-35f * totalRotation * (Math.PI / 180f)), 0, 0));
+		Quaternionf rotationTransform = new Quaternionf()
+				.rotationY((float) ((side.isLeft ? outwardAngle : -outwardAngle) * (Math.PI / 180f)))
+				.rotateX((float) (-35f * rotation * (Math.PI / 180f)));
 
 		if(breathingAnimation) {
 			float f5 = -MathHelper.cos(entity.age * 0.09F) * 0.45F + 0.45F;
-			matrixStack.multiply(new Quaternionf().rotationXYZ((float)(f5 * (Math.PI / 180f)), 0, 0));
+			rotationTransform.rotateX((float) (f5 * (Math.PI / 180f)));
 		}
 
+		matrixStack.multiply(rotationTransform);
 		matrixStack.scale(0.9995f, 1f, 1f); //z-fighting FIXXX
 	}
 
