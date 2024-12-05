@@ -19,6 +19,7 @@
 package com.wildfire.main;
 
 import com.wildfire.gui.GuiUtils;
+import com.wildfire.gui.WildfireToast;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
 import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
 import com.wildfire.main.cloud.CloudSync;
@@ -33,11 +34,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -51,10 +54,18 @@ import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.EquippableComponent;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -81,6 +92,9 @@ public final class WildfireEventHandler {
 	private static final KeyBinding TOGGLE_KEYBIND;
 	private static int timer = 0;
 
+	public static KeyBinding getConfigKeybind() {
+		return CONFIG_KEYBIND;
+	}
 	static {
 		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			// this has to be wrapped in a lambda to ensure that a dedicated server won't crash during startup
@@ -117,17 +131,27 @@ public final class WildfireEventHandler {
 		ClientEntityEvents.ENTITY_UNLOAD.register(WildfireEventHandler::onEntityUnload);
 		ClientTickEvents.END_CLIENT_TICK.register(WildfireEventHandler::onClientTick);
 		ClientPlayConnectionEvents.DISCONNECT.register(WildfireEventHandler::clientDisconnect);
+		ClientPlayConnectionEvents.JOIN.register(WildfireEventHandler::clientJoin);
 		LivingEntityFeatureRendererRegistrationCallback.EVENT.register(WildfireEventHandler::registerRenderLayers);
 		HudRenderCallback.EVENT.register(WildfireEventHandler::renderHud);
-		//ItemTooltipCallback.EVENT.register(WildfireEventHandler::renderTooltip); disabled for now
+		ItemTooltipCallback.EVENT.register(WildfireEventHandler::renderTooltip);
 	}
 
 	@Environment(EnvType.CLIENT)
 	private static void renderTooltip(ItemStack stack, Item.TooltipContext tooltipContext, TooltipType type, List<Text> lines) {
-		if (stack.getItem() == Items.LEATHER_CHESTPLATE) {
+		if(MinecraftClient.getInstance().player == null) return;
+		PlayerConfig pCfg = WildfireGender.getPlayerById(MinecraftClient.getInstance().player.getUuid());
+		if(pCfg == null || pCfg.getGender() == Gender.MALE) return;
 
-			lines.add(1, Text.literal("+1 Breast Support")
-					.formatted(Formatting.AQUA));
+
+		if (stack.getItem() instanceof ArmorItem armorItem) {
+			EquippableComponent equippableComponent = armorItem.getComponents().get(DataComponentTypes.EQUIPPABLE);
+			if(equippableComponent == null) return;
+
+			if(equippableComponent.slot() == EquipmentSlot.CHEST) {
+				lines.add(3, Text.translatable("wildfire_gender.armor.tooltip")
+						.formatted(Formatting.LIGHT_PURPLE));
+			}
 		}
 	}
 
@@ -224,6 +248,15 @@ public final class WildfireEventHandler {
 	private static void clientDisconnect(ClientPlayNetworkHandler networkHandler, MinecraftClient client) {
 		WildfireGender.CACHE.invalidateAll();
 		EntityConfig.CACHE.invalidateAll();
+	}
+	@Environment(EnvType.CLIENT)
+	private static void clientJoin(ClientPlayNetworkHandler var1, PacketSender var2, MinecraftClient client) {
+		if (client.player == null) return;
+		/*if (WildfireGender.getPlayerById(client.player.getUuid()) == null) {
+			var button = WildfireEventHandler.CONFIG_KEYBIND.getBoundKeyLocalizedText();
+			ToastManager toastManager = client.getToastManager();
+			toastManager.add(new WildfireToast(MinecraftClient.getInstance().textRenderer, Text.translatable("wildfire_gender.player_list.title"), Text.translatable("toast.wildfire_gender.get_started", button), false, 0));
+		}*/
 	}
 
 	/**
