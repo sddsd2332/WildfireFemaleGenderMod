@@ -18,12 +18,16 @@
 
 package com.wildfire.main;
 
+import com.wildfire.events.ArmorStandInteractEvents;
+import com.wildfire.events.ArmorStatsTooltipEvent;
+import com.wildfire.events.EntityHurtSoundEvent;
+import com.wildfire.events.EntityTickEvent;
 import com.wildfire.gui.GuiUtils;
-import com.wildfire.gui.WildfireToast;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
 import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
 import com.wildfire.main.cloud.CloudSync;
 import com.wildfire.main.config.GlobalConfig;
+import com.wildfire.main.entitydata.BreastDataComponent;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.main.entitydata.PlayerConfig;
 import com.wildfire.main.networking.ServerboundSyncPacket;
@@ -34,7 +38,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -54,34 +57,30 @@ import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.EquippableComponent;
-import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class WildfireEventHandler {
 	private WildfireEventHandler() {
@@ -95,6 +94,7 @@ public final class WildfireEventHandler {
 	public static KeyBinding getConfigKeybind() {
 		return CONFIG_KEYBIND;
 	}
+
 	static {
 		if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			// this has to be wrapped in a lambda to ensure that a dedicated server won't crash during startup
@@ -121,6 +121,8 @@ public final class WildfireEventHandler {
 	public static void registerCommonEvents() {
 		EntityTrackingEvents.START_TRACKING.register(WildfireEventHandler::onBeginTracking);
 		ServerPlayConnectionEvents.DISCONNECT.register(WildfireEventHandler::playerDisconnected);
+		ArmorStandInteractEvents.EQUIP.register(WildfireEventHandler::onEquipArmorStand);
+		ArmorStandInteractEvents.REMOVE.register(BreastDataComponent::removeFromStack);
 	}
 
 	/**
@@ -134,24 +136,20 @@ public final class WildfireEventHandler {
 		ClientPlayConnectionEvents.JOIN.register(WildfireEventHandler::clientJoin);
 		LivingEntityFeatureRendererRegistrationCallback.EVENT.register(WildfireEventHandler::registerRenderLayers);
 		HudRenderCallback.EVENT.register(WildfireEventHandler::renderHud);
-		ItemTooltipCallback.EVENT.register(WildfireEventHandler::renderTooltip);
+		ArmorStatsTooltipEvent.EVENT.register(WildfireEventHandler::renderTooltip);
+		EntityHurtSoundEvent.EVENT.register(WildfireEventHandler::onEntityHurt);
+		EntityTickEvent.EVENT.register(WildfireEventHandler::onEntityTick);
 	}
 
 	@Environment(EnvType.CLIENT)
-	private static void renderTooltip(ItemStack stack, Item.TooltipContext tooltipContext, TooltipType type, List<Text> lines) {
-		if(MinecraftClient.getInstance().player == null) return;
-		PlayerConfig pCfg = WildfireGender.getPlayerById(MinecraftClient.getInstance().player.getUuid());
-		if(pCfg == null || pCfg.getGender() == Gender.MALE) return;
+	private static void renderTooltip(ItemStack item, Consumer<Text> tooltipAppender, @Nullable PlayerEntity player) {
+		if(player == null || !GlobalConfig.INSTANCE.get(GlobalConfig.ARMOR_STAT)) return;
+		var playerConfig = WildfireGender.getPlayerById(player.getUuid());
+		if(playerConfig == null || !playerConfig.getGender().canHaveBreasts()) return;
 
-
-		if (stack.getItem() instanceof ArmorItem armorItem) {
-			EquippableComponent equippableComponent = armorItem.getComponents().get(DataComponentTypes.EQUIPPABLE);
-			if(equippableComponent == null) return;
-
-			if(equippableComponent.slot() == EquipmentSlot.CHEST) {
-				lines.add(3, Text.translatable("wildfire_gender.armor.tooltip")
-						.formatted(Formatting.LIGHT_PURPLE));
-			}
+		var equippableComponent = item.get(DataComponentTypes.EQUIPPABLE);
+		if(equippableComponent != null && equippableComponent.slot() == EquipmentSlot.CHEST) {
+			tooltipAppender.accept(Text.translatable("wildfire_gender.armor.tooltip").formatted(Formatting.LIGHT_PURPLE));
 		}
 	}
 
@@ -228,7 +226,6 @@ public final class WildfireEventHandler {
 			if(clientConfig != null) clientConfig.attemptCloudSync();
 		}
 
-
 		if(TOGGLE_KEYBIND.wasPressed() && client.currentScreen == null) {
 			GlobalConfig.RENDER_BREASTS ^= true;
 		}
@@ -249,6 +246,7 @@ public final class WildfireEventHandler {
 		WildfireGender.CACHE.invalidateAll();
 		EntityConfig.CACHE.invalidateAll();
 	}
+
 	@Environment(EnvType.CLIENT)
 	private static void clientJoin(ClientPlayNetworkHandler var1, PacketSender var2, MinecraftClient client) {
 		if (client.player == null) return;
@@ -279,6 +277,61 @@ public final class WildfireEventHandler {
 			// we wouldn't sync while they're out of tracking distance, and as such, their settings would be out
 			// of sync until they relog.
 			WildfireSync.sendToClient(syncTo, genderToSync);
+		}
+	}
+
+	/**
+	 * Play the relevant mod hurt sound when a player takes damage
+	 */
+	@Environment(EnvType.CLIENT)
+	private static void onEntityHurt(LivingEntity entity, DamageSource damageSource) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		if(client.player == null || client.world == null) return;
+		if(!(entity instanceof PlayerEntity player) || !player.getWorld().isClient()) return;
+
+		PlayerConfig genderPlayer = WildfireGender.getPlayerById(player.getUuid());
+		if(genderPlayer == null || !genderPlayer.hasHurtSounds()) return;
+
+		SoundEvent hurtSound = genderPlayer.getGender().getHurtSound();
+		if(hurtSound != null) {
+			float pitchVariation = (player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.2F;
+			player.playSound(hurtSound, 1f, pitchVariation + genderPlayer.getVoicePitch());
+		}
+	}
+
+	/**
+	 * Tick breast physics on entity tick
+	 */
+	@Environment(EnvType.CLIENT)
+	private static void onEntityTick(LivingEntity entity) {
+		if(EntityConfig.isSupportedEntity(entity)) {
+			EntityConfig cfg = EntityConfig.getEntity(entity);
+			if(entity instanceof ArmorStandEntity) {
+				cfg.readFromStack(entity.getEquippedStack(EquipmentSlot.CHEST));
+			}
+			cfg.tickBreastPhysics(entity);
+		}
+	}
+
+	/**
+	 * Apply player settings to chestplates equipped onto armor stands
+	 */
+	private static void onEquipArmorStand(PlayerEntity player, ItemStack item) {
+		PlayerConfig playerConfig = WildfireGender.getPlayerById(player.getUuid());
+		if(playerConfig == null) {
+			// while we shouldn't have our tag on the stack still, we're still checking to catch any armor
+			// that may still have the tag from older versions, or from potential cross-mod interactions
+			// which allow for removing items from armor stands without calling the vanilla
+			// #equip and/or #onBreak methods
+			BreastDataComponent.removeFromStack(item);
+			return;
+		}
+
+		// Note that we always attach player data to the item stack as a server has no concept of resource packs,
+		// making it impossible to compare against any armor data that isn't registered through the mod API.
+		BreastDataComponent component = BreastDataComponent.fromPlayer(player, playerConfig);
+		if(component != null) {
+			component.write(player.getWorld().getRegistryManager(), item);
 		}
 	}
 
