@@ -13,7 +13,12 @@
     "accessors.TextureManagerAccessor",
     "accessors.TrimSpriteKeyConstructorAccessor",
     "renderstate.LivingEntityRendererMixin",
-    "renderstate.LivingEntityRenderStateMixin"
+    "renderstate.LivingEntityRenderStateMixin",
+
+    "cape.MinecraftClientMixin",
+    "cape.PlayerListEntryMixin",
+    "cape.SkinTexturesWildfireImplMixin",
+    "cape.SkinTexturesMixin"
   ],
   "injectors": {
     "defaultRequire": 1
