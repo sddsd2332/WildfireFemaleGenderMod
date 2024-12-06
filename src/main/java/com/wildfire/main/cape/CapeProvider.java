@@ -57,7 +57,7 @@ public class CapeProvider {
     /**
      * Sentinel {@link Identifier} returned if the player's cape was obtained successfully, but they have no cape to display
      */
-    public static final Identifier NO_CAPE = Identifier.of("kappa", "no_cape");
+    public static final Identifier NO_CAPE = Identifier.of(WildfireGender.MODID, "no_cape");
 
     public static final LoadingCache<GameProfile, CompletableFuture<Identifier>> CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofMinutes(30))
