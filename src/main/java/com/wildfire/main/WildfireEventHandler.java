@@ -18,10 +18,7 @@
 
 package com.wildfire.main;
 
-import com.wildfire.events.ArmorStandInteractEvents;
-import com.wildfire.events.ArmorStatsTooltipEvent;
-import com.wildfire.events.EntityHurtSoundEvent;
-import com.wildfire.events.EntityTickEvent;
+import com.wildfire.events.*;
 import com.wildfire.gui.GuiUtils;
 import com.wildfire.gui.screen.WardrobeBrowserScreen;
 import com.wildfire.gui.screen.WildfireFirstTimeSetupScreen;
@@ -34,6 +31,7 @@ import com.wildfire.main.networking.ServerboundSyncPacket;
 import com.wildfire.main.networking.WildfireSync;
 import com.wildfire.render.GenderArmorLayer;
 import com.wildfire.render.GenderLayer;
+import com.wildfire.render.RenderStateEntityCapture;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -53,11 +51,14 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -139,6 +140,23 @@ public final class WildfireEventHandler {
 		ArmorStatsTooltipEvent.EVENT.register(WildfireEventHandler::renderTooltip);
 		EntityHurtSoundEvent.EVENT.register(WildfireEventHandler::onEntityHurt);
 		EntityTickEvent.EVENT.register(WildfireEventHandler::onEntityTick);
+		PlayerNametagRenderEvent.EVENT.register(WildfireEventHandler::onPlayerNametag);
+	}
+
+	@Environment(EnvType.CLIENT)
+	private static void onPlayerNametag(PlayerEntityRenderState state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Consumer<Text> renderHelper) {
+		var player = ((RenderStateEntityCapture) state).getEntity() instanceof PlayerEntity p ? p : null;
+		if(player == null) return;
+		var nametag = WildfireGenderClient.getNametag(player.getUuid());
+		if(nametag == null) return;
+
+		matrixStack.push();
+		matrixStack.translate(0f, 0.95f, 0.f);
+		matrixStack.scale(0.5f, 0.5f, 0.5f);
+		renderHelper.accept(nametag);
+		matrixStack.pop();
+		// shift the rest of the name tag up a little bit
+		matrixStack.translate(0f, 2.15F * 1.15F * 0.025F, 0f);
 	}
 
 	@Environment(EnvType.CLIENT)
