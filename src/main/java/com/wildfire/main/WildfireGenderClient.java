@@ -101,7 +101,7 @@ public class WildfireGenderClient implements ClientModInitializer {
 		} else if(WildfireGender.CREATOR_UUID.equals(uuid)) {
 			return Text.translatable("wildfire_gender.nametag.creator").formatted(Formatting.LIGHT_PURPLE);
 		} else if(WildfireGender.CONTRIBUTOR_UUIDS.contains(uuid)) {
-			return Text.translatable("wildfire_gender.nametag.contributor").formatted(Formatting.LIGHT_PURPLE);
+			return Text.translatable("wildfire_gender.nametag.contributor").formatted(Formatting.GOLD);
 		}
 		return null;
 	}
