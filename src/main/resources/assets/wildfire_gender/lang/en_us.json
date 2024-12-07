@@ -114,5 +114,8 @@
 	"wildfire_gender.details.next_page": "Next Page",
 	"wildfire_gender.details.prev_page": "Prev Page",
 
-	"wildfire_gender.cloud_details.title": "Cloud Sync Server Information"
+	"wildfire_gender.cloud_details.title": "Cloud Sync Server Information",
+
+	"wildfire_gender.nametag.creator": "WFGM Mod Creator",
+	"wildfire_gender.nametag.contributor": "WFGM Contributor"
 }

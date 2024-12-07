@@ -9,6 +9,7 @@
   "client": [
     "ItemStackMixin",
     "LivingEntityMixin",
+    "PlayerEntityRendererMixin",
     "accessors.EquipmentRendererAccessor",
     "accessors.TextureManagerAccessor",
     "accessors.TrimSpriteKeyConstructorAccessor",
