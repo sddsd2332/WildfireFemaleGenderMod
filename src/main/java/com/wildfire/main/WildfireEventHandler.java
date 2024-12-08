@@ -167,7 +167,8 @@ public final class WildfireEventHandler {
 
 		var equippableComponent = item.get(DataComponentTypes.EQUIPPABLE);
 		if(equippableComponent != null && equippableComponent.slot() == EquipmentSlot.CHEST) {
-			tooltipAppender.accept(Text.translatable("wildfire_gender.armor.tooltip").formatted(Formatting.LIGHT_PURPLE));
+			float physResistance = (WildfireHelper.getArmorConfig(item).physicsResistance());
+			tooltipAppender.accept(Text.translatable("wildfire_gender.armor.tooltip", Math.floor(physResistance * 100f) / 100f).formatted(Formatting.LIGHT_PURPLE));
 		}
 	}
 

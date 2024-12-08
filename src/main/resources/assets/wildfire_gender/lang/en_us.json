@@ -4,7 +4,7 @@
 	"key.wildfire_gender.toggle": "Toggle Breast Rendering",
 	"toast.wildfire_gender.get_started": "Press %s to get started!",
 
-	"wildfire_gender.armor.tooltip": "+1 Breast Support",
+	"wildfire_gender.armor.tooltip": "+%s Breast Support",
 
 	"wildfire_gender.player_list.title": "Female Gender Mod",
 	"wildfire_gender.player_list.settings_button": "Settings",
