@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
     @Inject(method = "tick", at = @At("TAIL"))
-    public void kappa$onTick(CallbackInfo ci) {
+    public void wildfiregender$onTick(CallbackInfo ci) {
         CapeProvider.tick();
     }
 }
