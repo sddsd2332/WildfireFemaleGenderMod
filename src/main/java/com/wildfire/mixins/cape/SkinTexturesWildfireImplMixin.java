@@ -31,8 +31,7 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(SkinTextures.class)
 @Implements(@Interface(iface = SkinTexturesWildfire.class, prefix = "wildfiregender$", unique = true))
 public abstract class SkinTexturesWildfireImplMixin {
-    private @Unique
-    @Nullable Identifier wildfiregender$overriddenCapeTexture = null;
+    private @Unique @Nullable Identifier wildfiregender$overriddenCapeTexture = null;
 
     public void wildfiregender$overrideCapeTexture(@Nullable Identifier texture) {
         this.wildfiregender$overriddenCapeTexture = texture;

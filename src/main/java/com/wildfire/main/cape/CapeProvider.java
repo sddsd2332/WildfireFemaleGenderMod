@@ -93,7 +93,7 @@ public class CapeProvider {
             Identifier texture = tryUrl(player, CAPE_URL.replace("{uuid}", player.getId().toString()));
 
             /*if(texture == null) { //fallback url if existed, which it doesn't.
-                texture = tryUrl(player, FALLBACK_CAPE_URL.replace("{uuid}", player.getName()));
+                texture = tryUrl(player, FALLBACK_CAPE_URL.replace("{uuid}", player.getId().toString()));
             }*/
             return texture;
         }, Util.getIoWorkerExecutor());
