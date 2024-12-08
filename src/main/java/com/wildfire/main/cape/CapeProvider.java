@@ -52,8 +52,6 @@ import java.util.regex.Pattern;
 public class CapeProvider {
 
 
-    private static final List<ToDestroy> DESTROY_QUEUE = new ArrayList<>();
-
     /**
      * Sentinel {@link Identifier} returned if the player's cape was obtained successfully, but they have no cape to display
      */
@@ -71,8 +69,7 @@ public class CapeProvider {
             });
 
     private static final Pattern USERNAME = Pattern.compile("^[a-z0-9_]{1,16}$", Pattern.CASE_INSENSITIVE);
-    private static final String CAPE_URL = "https://femalegendermod.net/capes/{name}.png";
-    private static final String FALLBACK_CAPE_URL = "https://femalegendermod.net/capes/{name}.png";
+    private static final String CAPE_URL = "https://femalegendermod.net/capes/{uuid}.png";
 
     private static void remove(RemovalNotification<GameProfile, CompletableFuture<@Nullable Identifier>> entry) {
         var future = entry.getValue();
@@ -82,22 +79,8 @@ public class CapeProvider {
 
         var id = future.getNow(null);
         if(id != null) {
-            DESTROY_QUEUE.add(new ToDestroy(id));
+            MinecraftClient.getInstance().getTextureManager().destroyTexture(id); //destroy texture immediately
         }
-    }
-
-    public static void tick() {
-        DESTROY_QUEUE.removeIf(tex -> {
-            // wait a few ticks before destroying the texture to avoid the render loop logging a nuisance error
-            // while the cape is still cached during reloads
-            if(tex.ticksLeft-- > 0) {
-                return false;
-            }
-
-            WildfireGender.LOGGER.debug("Destroying cape texture {}", tex.id);
-            MinecraftClient.getInstance().getTextureManager().destroyTexture(tex.id);
-            return true;
-        });
     }
 
     // This loads the cape for one player, doesn't matter if it's the player or not.
@@ -107,10 +90,12 @@ public class CapeProvider {
                 // immediately ignore any obviously invalid usernames (such as those from npcs)
                 return null;
             }
-            Identifier texture = tryUrl(player, CAPE_URL.replace("{name}", player.getName()));
-            if(texture == null) {
-                texture = tryUrl(player, FALLBACK_CAPE_URL.replace("{name}", player.getName()));
-            }
+            Identifier texture = tryUrl(player, CAPE_URL.replace("{uuid}", player.getId().toString()));
+            System.out.println("LOADING CAPE FOR PLAYER " + player.getId().toString());
+
+            /*if(texture == null) { //fallback url if existed, which it doesn't.
+                texture = tryUrl(player, FALLBACK_CAPE_URL.replace("{uuid}", player.getName()));
+            }*/
             return texture;
         }, Util.getIoWorkerExecutor());
     }
@@ -123,7 +108,6 @@ public class CapeProvider {
         int srcHeight = in.getHeight(), srcWidth = in.getWidth();
         int zoom = (int) Math.ceil(in.getHeight() / 32f);
         NativeImage out = new NativeImage(64 * zoom, 32 * zoom, true);
-        // NativeImage.copyFrom doesn't work! :(
         for (int x = 0; x < srcWidth; x++) {
             for (int y = 0; y < srcHeight; y++) {
                 out.setColorArgb(x, y, in.getColorArgb(x, y));
@@ -159,12 +143,4 @@ public class CapeProvider {
 
     private CapeProvider() { }
 
-    private static class ToDestroy {
-        private final Identifier id;
-        private int ticksLeft = 3;
-
-        ToDestroy(Identifier id) {
-            this.id = id;
-        }
-    }
 }

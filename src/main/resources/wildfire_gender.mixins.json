@@ -15,7 +15,6 @@
     "renderstate.LivingEntityRendererMixin",
     "renderstate.LivingEntityRenderStateMixin",
 
-    "cape.MinecraftClientMixin",
     "cape.PlayerListEntryMixin",
     "cape.SkinTexturesWildfireImplMixin",
     "cape.SkinTexturesMixin"

@@ -35,10 +35,10 @@ public abstract class SkinTexturesWildfireImplMixin {
     @Nullable Identifier wildfiregender$overriddenCapeTexture = null;
 
     public void wildfiregender$overrideCapeTexture(@Nullable Identifier texture) {
-        this.kappa$overriddenCapeTexture = texture;
+        this.wildfiregender$overriddenCapeTexture = texture;
     }
 
     public @Nullable Identifier wildfiregender$getOverriddenCapeTexture() {
-        return kappa$overriddenCapeTexture;
+        return wildfiregender$overriddenCapeTexture;
     }
 }
