@@ -31,15 +31,21 @@ import com.wildfire.render.WildfireModelRenderer.OverlayModelBox;
 import com.wildfire.render.WildfireModelRenderer.PositionTextureVertex;
 
 import java.lang.Math;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SignBlock;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.entity.SignBlockEntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
@@ -50,6 +56,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Nullable;
@@ -138,6 +146,16 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 			renderSides(state, getContextModel(), matrixStack, side -> {
 				renderBreast(state, matrixStack, vertexConsumerProvider, light, overlay, side);
 			});
+
+			matrixStack.push();
+			try {
+				setupTransformations(state, getContextModel(), matrixStack, BreastSide.RIGHT);
+				matrixStack.translate(0.4f * 0.0625f, 1.25F * 0.0625f, -0.25f * 0.0625f);
+				WildfireModelRenderer.ModelPlane plane = new WildfireModelRenderer.ModelPlane(3.5f, 1, -1f, 0, 0, 0, 0, 3.5f, 1, 1, 0.0F, false);
+				renderBoobTag(state, plane, matrixStack, vertexConsumerProvider, light, overlay, 0xFFFFFF);
+			} finally {
+				matrixStack.pop();
+			}
 		} catch(Exception e) {
 			WildfireGender.LOGGER.error("Failed to render breast layer", e);
 		}
@@ -310,6 +328,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 		try {
 			setupTransformations(state, model, matrixStack, BreastSide.LEFT);
 			renderer.accept(BreastSide.LEFT);
+
 		} finally {
 			matrixStack.pop();
 		}
@@ -322,6 +341,76 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 			matrixStack.pop();
 		}
 	}
+
+	protected void renderBoobTag(S state, WildfireModelRenderer.ModelPlane quad, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider,
+									int light, int overlay, int color) {
+		RenderLayer breastRenderType = RenderLayer.getEntityCutout(Identifier.of(WildfireGender.MODID, "textures/contributor_tag.png"));
+		if(breastRenderType == null) return; // only render if the player is visible in some capacity
+		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(breastRenderType);
+
+		Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+		Matrix3f matrix3f = matrixStack.peek().getNormalMatrix();
+		Vector3f vector3f = new Vector3f(quad.plane.normal.x, quad.plane.normal.y, quad.plane.normal.z).mul(matrix3f);
+		float normalX = vector3f.x;
+		float normalY = vector3f.y;
+		float normalZ = vector3f.z;
+		for(PositionTextureVertex vertex : quad.plane.vertexPositions) {
+			float j = vertex.x() / 16.0F;
+			float k = vertex.y() / 16.0F;
+			float l = vertex.z() / 16.0F;
+			Vector4f vector4f = new Vector4f(j, k, l, 1.0F).mul(matrix4f);
+			vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z(), color, vertex.u(), vertex.v(),
+					overlay, light, normalX, normalY, normalZ);
+		}
+
+		//Render text
+		renderText(Text.literal("CREATOR"), matrixStack, vertexConsumerProvider, light);
+
+	}
+
+
+
+	private void applyTextTransforms(MatrixStack matrices, boolean front, Vec3d textOffset) {
+		if (!front) {
+			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
+		}
+
+		float f = 0.015625F * 0.25f;//this.getTextScale();
+		matrices.translate(textOffset);
+		matrices.scale(f, -f, f);
+	}
+
+	private void renderText(Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+
+		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+
+		matrices.push();
+		this.applyTextTransforms(matrices, false, new Vec3d(0.1125, -0.02f, 0.0025));
+		int i = 0x000000;
+		int k = i;
+		int l = light;
+
+		textRenderer
+				.draw(
+						text,
+						-textRenderer.getWidth(text ) / 2,
+						0,
+						k,
+						false,
+						matrices.peek().getPositionMatrix(),
+						vertexConsumers,
+						TextRenderer.TextLayerType.POLYGON_OFFSET,
+						0,
+						l
+				);
+
+
+		matrices.pop();
+	}
+
+
+
+
 
 	protected static void renderBox(WildfireModelRenderer.ModelBox model, MatrixStack matrixStack, VertexConsumer vertexConsumer,
 									int light, int overlay, int color) {

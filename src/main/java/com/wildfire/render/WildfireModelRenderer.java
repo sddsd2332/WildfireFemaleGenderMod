@@ -29,6 +29,70 @@ public final class WildfireModelRenderer {
 		throw new UnsupportedOperationException();
 	}
 
+
+	public static class ModelPlane {
+		public WildfireModelRenderer.TexturedQuad plane;
+		public final float posX1;
+		public final float posY1;
+		public final float posZ1;
+		public final float posX2;
+		public final float posY2;
+		public final float posZ2;
+
+		public ModelPlane(float tW, float tH, float texU, float texV, float x, float y, float z, float dx, float dy, float dz, float delta, boolean mirror) {
+			this(tW, tH, texU, texV, x, y, z, dx, dy, dz, delta, mirror, 1);
+		}
+
+		protected ModelPlane(float tW, float tH, float texU, float texV, float x, float y, float z, float dx, float dy, float dz, float delta, boolean mirror, int quads) {
+			this(tW, tH, texU, texV, x, y, z, dx, dy, dz, delta, mirror, quads, false);
+		}
+
+		protected ModelPlane(float tW, float tH, float texU, float texV, float x, float y, float z, float dx, float dy, float dz, float delta, boolean mirror, int quads, boolean extra) {
+			this.posX1 = x;
+			this.posY1 = y;
+			this.posZ1 = z;
+			this.posX2 = x + (float) dx;
+			this.posY2 = y + (float) dy;
+			this.posZ2 = z + (float) dz;
+			float f = x + (float) dx;
+			float f1 = y + (float) dy;
+			float f2 = z + (float) dz;
+			x = x - delta;
+			y = y - delta;
+			z = z - delta;
+			f = f + delta;
+			f1 = f1 + delta;
+			f2 = f2 + delta;
+			if (mirror) {
+				float f3 = f;
+				f = x;
+				x = f3;
+			}
+			initQuads(tW, tH, texU, texV, dx, dy, dz, mirror, extra,
+					new PositionTextureVertex(f, y, z, 0.0F, 8.0F),
+					new PositionTextureVertex(f, f1, z, 8.0F, 8.0F),
+					new PositionTextureVertex(x, f1, z, 8.0F, 0.0F),
+					new PositionTextureVertex(x, y, f2, 0.0F, 0.0F),
+					new PositionTextureVertex(f, y, f2, 0.0F, 8.0F),
+					new PositionTextureVertex(f, f1, f2, 8.0F, 8.0F),
+					new PositionTextureVertex(x, f1, f2, 8.0F, 0.0F),
+					new PositionTextureVertex(x, y, z, 0.0F, 0.0F)
+			);
+		}
+
+		protected void initQuads(float tW, float tH, float texU, float texV, float dx, float dy, float dz, boolean mirror, boolean extra, PositionTextureVertex vertex,
+								 PositionTextureVertex vertex1, PositionTextureVertex vertex2, PositionTextureVertex vertex3, PositionTextureVertex vertex4, PositionTextureVertex vertex5,
+								 PositionTextureVertex vertex6, PositionTextureVertex vertex7) {
+			/*this.quads[3] = new TexturedQuad(texU + dz, texV + dz + 4, texU + dz + dx, texV + 1 + dz + dy, tW, tH - 1, mirror, Direction.UP,
+					vertex1, vertex2, vertex6, vertex5);*/
+			this.plane = new TexturedQuad(texU + dz, texV + dz, texU + dz + dx, texV + dz + dy, tW, tH, mirror, Direction.NORTH,
+					vertex, vertex7, vertex2, vertex1);
+		}
+	}
+
+
+
+
 	public static class ModelBox {
 		public final WildfireModelRenderer.TexturedQuad[] quads;
 		public final float posX1;
