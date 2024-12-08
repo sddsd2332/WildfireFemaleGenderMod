@@ -70,7 +70,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 
 	private BreastModelBox lBreast, rBreast;
 	private static final OverlayModelBox lBreastWear, rBreastWear;
-
+	private static final WildfireModelRenderer.ModelPlane namePlatePlane;
 	private final FeatureRendererContext<S, M> context;
 
 	private float preBreastSize, preBreastOffsetZ;
@@ -84,6 +84,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 	static {
 		lBreastWear = new OverlayModelBox(true, 64, 64, 17, 34, -4F, 0.0F, 0F, 4, 5, 3, 0.0F, false);
 		rBreastWear = new OverlayModelBox(false, 64, 64, 21, 34, 0, 0.0F, 0F, 4, 5, 3, 0.0F, false);
+		namePlatePlane = new WildfireModelRenderer.ModelPlane(3.5f, 1, -1f, 0, 0, 0, 0, 3.5f, 1, 1, 0.0F, false);
 	}
 
 	public GenderLayer(FeatureRendererContext<S, M> render) {
@@ -151,8 +152,9 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 			try {
 				setupTransformations(state, getContextModel(), matrixStack, BreastSide.RIGHT);
 				matrixStack.translate(0.4f * 0.0625f, 1.25F * 0.0625f, -0.25f * 0.0625f);
-				WildfireModelRenderer.ModelPlane plane = new WildfireModelRenderer.ModelPlane(3.5f, 1, -1f, 0, 0, 0, 0, 3.5f, 1, 1, 0.0F, false);
-				renderBoobTag(state, plane, matrixStack, vertexConsumerProvider, light, overlay, 0xFFFFFF);
+
+				//todo, only render when player is a contributor of some sort.
+				renderBoobTag(state, namePlatePlane, matrixStack, vertexConsumerProvider, light, overlay, 0xFFFFFF);
 			} finally {
 				matrixStack.pop();
 			}
@@ -370,41 +372,18 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 
 
 
-	private void applyTextTransforms(MatrixStack matrices, boolean front, Vec3d textOffset) {
-		if (!front) {
-			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
-		}
-
+	private void applyTextTransforms(MatrixStack matrices, Vec3d textOffset) {
+		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
 		float f = 0.015625F * 0.25f;//this.getTextScale();
 		matrices.translate(textOffset);
 		matrices.scale(f, -f, f);
 	}
 
 	private void renderText(Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
-
 		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-
 		matrices.push();
-		this.applyTextTransforms(matrices, false, new Vec3d(0.1125, -0.02f, 0.0025));
-		int i = 0x000000;
-		int k = i;
-		int l = light;
-
-		textRenderer
-				.draw(
-						text,
-						-textRenderer.getWidth(text ) / 2,
-						0,
-						k,
-						false,
-						matrices.peek().getPositionMatrix(),
-						vertexConsumers,
-						TextRenderer.TextLayerType.POLYGON_OFFSET,
-						0,
-						l
-				);
-
-
+		this.applyTextTransforms(matrices, new Vec3d(0.1125, -0.02f, 0.0025));
+		textRenderer.draw( text, -textRenderer.getWidth(text) / 2, 0, 0x000000, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
 		matrices.pop();
 	}
 
@@ -412,8 +391,7 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 
 
 
-	protected static void renderBox(WildfireModelRenderer.ModelBox model, MatrixStack matrixStack, VertexConsumer vertexConsumer,
-									int light, int overlay, int color) {
+	protected static void renderBox(WildfireModelRenderer.ModelBox model, MatrixStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, int color) {
 		Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
 		Matrix3f matrix3f = matrixStack.peek().getNormalMatrix();
 		for(WildfireModelRenderer.TexturedQuad quad : model.quads) {
