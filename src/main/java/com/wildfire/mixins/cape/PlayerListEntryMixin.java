@@ -38,7 +38,7 @@ public abstract class PlayerListEntryMixin {
 
     @SuppressWarnings("DataFlowIssue")
     @ModifyReturnValue(method = "getSkinTextures", at = @At("RETURN"))
-    public SkinTextures kappa$replaceCapeTexture(SkinTextures original) {
+    public SkinTextures wildfiregender$replaceCapeTexture(SkinTextures original) {
         var cape = CapeProvider.CACHE.getUnchecked(profile);
         var duck = ((SkinTexturesWildfire)(Object)original);
         var tex = cape.getNow(null);
