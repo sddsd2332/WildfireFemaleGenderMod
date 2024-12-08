@@ -56,13 +56,11 @@ import net.minecraft.client.render.entity.ArmorStandEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.model.ParrotEntityModel;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -151,7 +149,15 @@ public final class WildfireEventHandler {
 		if(nametag == null) return;
 
 		matrixStack.push();
-		matrixStack.translate(0f, 0.95f, 0.f);
+		float translationAmt = switch(player.getPose()) {
+			case EntityPose.CROUCHING -> 0.8f;
+			case EntityPose.SLEEPING -> 0.125f;
+			case EntityPose.SWIMMING -> 0.3f;
+			case EntityPose.GLIDING -> 0.3f;
+			case EntityPose.SITTING -> 0.275f; //not tested; sitting on a pig doesn't work apparently.
+            default -> 0.95f;
+        };
+		matrixStack.translate(0f, translationAmt, 0f);
 		matrixStack.scale(0.5f, 0.5f, 0.5f);
 		renderHelper.accept(nametag);
 		matrixStack.pop();
