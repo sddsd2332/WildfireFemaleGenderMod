@@ -19,11 +19,9 @@
 package com.wildfire.render;
 
 import com.wildfire.api.IGenderArmor;
-import com.wildfire.main.WildfireEventHandler;
+import com.wildfire.main.*;
 import com.wildfire.main.config.GlobalConfig;
 import com.wildfire.main.entitydata.Breasts;
-import com.wildfire.main.WildfireGender;
-import com.wildfire.main.WildfireHelper;
 import com.wildfire.main.entitydata.EntityConfig;
 import com.wildfire.physics.BreastPhysics;
 import com.wildfire.render.WildfireModelRenderer.BreastModelBox;
@@ -68,6 +66,9 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 
 	private static final float DEG_TO_RAD = (float) (Math.PI / 180);
 
+	private final Identifier CREATOR_TAG = Identifier.of(WildfireGender.MODID, "textures/creator_tag.png");
+	private final Identifier CONTRIBUTOR_TAG = Identifier.of(WildfireGender.MODID, "textures/contributor_tag.png");
+	private final Identifier TRANSLATOR_TAG = Identifier.of(WildfireGender.MODID, "textures/translator_tag.png");
 	private BreastModelBox lBreast, rBreast;
 	private static final OverlayModelBox lBreastWear, rBreastWear;
 	private static final WildfireModelRenderer.ModelPlane namePlatePlane;
@@ -153,8 +154,11 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 				setupTransformations(state, getContextModel(), matrixStack, BreastSide.RIGHT);
 				matrixStack.translate(0.4f * 0.0625f, 1.25F * 0.0625f, -0.25f * 0.0625f);
 
+				BoobTag boobTag = WildfireGenderClient.getBoobTag(ent.getUuid());
 				//todo, only render when player is a contributor of some sort.
-				renderBoobTag(state, namePlatePlane, matrixStack, vertexConsumerProvider, light, overlay, 0xFFFFFF);
+				if(boobTag != null) {
+					renderBoobTag(boobTag.getTitle(), boobTag.getText(), state, namePlatePlane, matrixStack, vertexConsumerProvider, light, overlay, 0xFFFFFF);
+				}
 			} finally {
 				matrixStack.pop();
 			}
@@ -344,9 +348,17 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 		}
 	}
 
-	protected void renderBoobTag(S state, WildfireModelRenderer.ModelPlane quad, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider,
+	protected void renderBoobTag(String title, Text text, S state, WildfireModelRenderer.ModelPlane quad, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider,
 									int light, int overlay, int color) {
-		RenderLayer breastRenderType = RenderLayer.getEntityCutout(Identifier.of(WildfireGender.MODID, "textures/contributor_tag.png"));
+		LivingEntity ent = getEntity(state);
+		if(ent == null) return;
+
+		RenderLayer breastRenderType = switch(title) {
+			case "CREATOR" -> RenderLayer.getEntityCutout(CREATOR_TAG);
+			case "CONTRIBUTOR" -> RenderLayer.getEntityCutout(CONTRIBUTOR_TAG);
+            default -> RenderLayer.getEntityCutout(CONTRIBUTOR_TAG);
+        };
+
 		if(breastRenderType == null) return; // only render if the player is visible in some capacity
 		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(breastRenderType);
 
@@ -366,29 +378,22 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 		}
 
 		//Render text
-		renderText(Text.literal("CREATOR"), matrixStack, vertexConsumerProvider, light);
+
+		renderText(text, matrixStack, vertexConsumerProvider, light);
 
 	}
 
-
-
-	private void applyTextTransforms(MatrixStack matrices, Vec3d textOffset) {
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
-		float f = 0.015625F * 0.25f;//this.getTextScale();
-		matrices.translate(textOffset);
-		matrices.scale(f, -f, f);
-	}
 
 	private void renderText(Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
 		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 		matrices.push();
-		this.applyTextTransforms(matrices, new Vec3d(0.1125, -0.02f, 0.0025));
-		textRenderer.draw( text, -textRenderer.getWidth(text) / 2, 0, 0x000000, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
+			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
+			float scale = 0.015625F * 0.2f;//this.getTextScale();
+			matrices.translate(new Vec3d(0.1125, -0.02f, 0.0025));
+			matrices.scale(scale, -scale, scale);
+			textRenderer.draw( text, -textRenderer.getWidth(text) / 2f, 0, 0x000000, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light);
 		matrices.pop();
 	}
-
-
-
 
 
 	protected static void renderBox(WildfireModelRenderer.ModelBox model, MatrixStack matrixStack, VertexConsumer vertexConsumer, int light, int overlay, int color) {

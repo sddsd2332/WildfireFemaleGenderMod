@@ -35,6 +35,7 @@ import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -102,6 +103,16 @@ public class WildfireGenderClient implements ClientModInitializer {
 			return Text.translatable("wildfire_gender.nametag.creator").formatted(Formatting.LIGHT_PURPLE);
 		} else if(WildfireGender.CONTRIBUTOR_UUIDS.contains(uuid)) {
 			return Text.translatable("wildfire_gender.nametag.contributor").formatted(Formatting.GOLD);
+		}
+		return null;
+	}
+
+	public static @Nullable BoobTag getBoobTag(UUID uuid) {
+
+		if (WildfireGender.CREATOR_UUID.equals(uuid)) {
+			return new BoobTag("CREATOR", Text.translatable("wildfire_gender.nametag.creator_short"));
+		} else if (WildfireGender.CONTRIBUTOR_UUIDS.contains(uuid)) {
+			return new BoobTag("CONTRIBUTOR", Text.translatable("wildfire_gender.nametag.contributor_short"));
 		}
 		return null;
 	}
