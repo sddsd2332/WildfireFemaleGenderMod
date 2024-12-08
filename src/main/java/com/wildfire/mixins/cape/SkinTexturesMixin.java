@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(SkinTextures.class)
 public abstract class SkinTexturesMixin {
     @ModifyReturnValue(method = {"capeTexture", "elytraTexture"}, at = @At("RETURN"))
-    public @Nullable Identifier wildfire$replaceCapeTexture(Identifier original) {
+    public @Nullable Identifier wildfiregender$replaceCapeTexture(Identifier original) {
         if(original == null) {
             return ((SkinTexturesWildfire) this).getOverriddenCapeTexture();
         }
