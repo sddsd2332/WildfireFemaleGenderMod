@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Unique;
 @Implements(@Interface(iface = SkinTexturesWildfire.class, prefix = "wildfiregender$", unique = true))
 public abstract class SkinTexturesWildfireImplMixin {
     private @Unique
-    @Nullable Identifier kappa$overriddenCapeTexture = null;
+    @Nullable Identifier wildfiregender$overriddenCapeTexture = null;
 
     public void kappa$overrideCapeTexture(@Nullable Identifier texture) {
         this.kappa$overriddenCapeTexture = texture;
