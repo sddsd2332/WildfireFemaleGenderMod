@@ -25,6 +25,7 @@ import com.google.common.cache.RemovalNotification;
 import com.mojang.authlib.GameProfile;
 import com.wildfire.main.WildfireGender;
 import net.fabricmc.fabric.mixin.client.rendering.CapeFeatureRendererMixin;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.feature.CapeFeatureRenderer;
@@ -58,7 +59,7 @@ public class CapeProvider {
     public static final Identifier NO_CAPE = Identifier.of(WildfireGender.MODID, "no_cape");
 
     public static final LoadingCache<GameProfile, CompletableFuture<Identifier>> CACHE = CacheBuilder.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(30))
+            .expireAfterAccess(FabricLoader.getInstance().isDevelopmentEnvironment()?Duration.ofSeconds(1):Duration.ofMinutes(30)) //debug
             .removalListener(CapeProvider::remove)
             .build(new CacheLoader<>() {
                 @NotNull
