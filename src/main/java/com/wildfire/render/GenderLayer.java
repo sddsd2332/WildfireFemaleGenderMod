@@ -165,9 +165,9 @@ public class GenderLayer<S extends BipedEntityRenderState, M extends BipedEntity
 		if(isChristmas && entityConfig instanceof PlayerConfig plrConfig && plrConfig.hasHolidayThemes()) {
 			try {
 				int overlay = LivingEntityRenderer.getOverlay(state, 0);
-				RenderLayer breastRenderType = RenderLayer.getEntityTranslucent(Identifier.of(WildfireGender.MODID, "textures/santa_hat.png"));
-				if (breastRenderType == null) return; // only render if the player is visible in some capacity
-				VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(breastRenderType);
+				RenderLayer hatRenderType = RenderLayer.getEntityTranslucent(Identifier.of(WildfireGender.MODID, "textures/santa_hat.png"));
+				if (hatRenderType == null) return;
+				VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(hatRenderType);
 
 				if (state.baby) {
 					matrixStack.scale(state.ageScale, state.ageScale, state.ageScale);
