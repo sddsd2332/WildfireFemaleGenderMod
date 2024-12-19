@@ -269,6 +269,7 @@ public class BreastPhysics {
 		// as any faster and the arm effectively doesn't swing at all; we check the previous tick's swing duration for
 		// reasons explained later on in this block
 		if((swingDuration > 1 || lastSwingDuration > 1) && pose != EntityPose.SLEEPING) {
+
 			float amplifier = 0f;
 			if(swingDuration < 6) {
 				amplifier = 0.15f * (6 - swingDuration);
@@ -283,6 +284,9 @@ public class BreastPhysics {
 			if(entity.handSwinging && entity.age % everyNthTick == 0) {
 				float hasteMult = MathHelper.clamp(everyNthTick / 5f, 0.4f, 1f);
 				this.targetBounceY += (Math.random() > 0.5 ? -0.25f : 0.25f) * amplifier * bounceIntensity * hasteMult;
+
+
+				this.targetBounceX = (0.5f * bounceIntensity) * (entity.getMainArm()==Arm.RIGHT?1f:-1f);
 			}
 
 			int swingTickDelta = entity.handSwingTicks - lastSwingTick;
