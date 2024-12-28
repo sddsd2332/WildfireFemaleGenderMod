@@ -31,7 +31,6 @@ public record SimpleGenderArmor(float physicsResistance, float tightness) implem
     public static final SimpleGenderArmor GOLD = new SimpleGenderArmor(0.85F);
     public static final SimpleGenderArmor IRON = new SimpleGenderArmor(1);
     public static final SimpleGenderArmor DIAMOND = new SimpleGenderArmor(1);
-    public static final SimpleGenderArmor NETHERITE = new SimpleGenderArmor(1);
 
     public SimpleGenderArmor(float physicsResistance) {
         this(physicsResistance, 0);
